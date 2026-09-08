@@ -5,25 +5,25 @@ import { VotePage } from "./pages/VotePage";
 import { AdminPage } from "./pages/AdminPage";
 import { AdminSessionsListPage } from "./pages/AdminSessionsListPage";
 import { CreateQuestionPage } from "./pages/CreateQuestionPage";
+import { UserProfileBar } from "./components/UserProfileBar";
+import { isAdminEmail } from "./lib/isAdminEmail";
 
 function getSessionIdFromUrl(): string | null {
   return new URLSearchParams(window.location.search).get("session");
 }
 
-function isAdminRoute(): boolean {
-  return window.location.pathname.replace(/\/+$/, "") === "/admin";
-}
-
 type AdminView = "list" | "create";
 
 export default function App() {
-  const { session, loading } = useAuth();
+  const { session, profile, loading } = useAuth();
   const [manualSessionId, setManualSessionId] = useState("");
   const [adminView, setAdminView] = useState<AdminView>("list");
 
-  const isAdmin = isAdminRoute();
   const urlSessionId = getSessionIdFromUrl();
   const sessionId = urlSessionId ?? (manualSessionId.trim() || null);
+  // Xác định quyền admin dựa vào EMAIL đăng nhập (khớp VITE_ADMIN_EMAILS),
+  // không còn phụ thuộc vào việc gõ đúng path /admin trên URL.
+  const isAdmin = isAdminEmail(profile?.email);
 
   if (loading) {
     return <FullScreenMessage text="Đang tải..." />;
@@ -33,30 +33,31 @@ export default function App() {
     return <LoginPage />;
   }
 
-  // Admin vào /admin mà chưa chọn session cụ thể (không có ?session= trên URL
-  // và chưa tự nhập/tạo) -> hiển thị danh sách câu hỏi + nút tạo mới, thay vì
-  // ô "nhập session id" chung dùng cho user thường.
+  // Admin chưa chọn câu hỏi cụ thể (không có ?session= trên URL) -> mặc định
+  // vào thẳng danh sách câu hỏi + nút tạo mới, không cần vào /admin thủ công.
   if (isAdmin && !sessionId) {
-    return adminView === "create" ? (
-      <CreateQuestionPage
-        onCreated={(id) => setManualSessionId(id)}
-        onCancel={() => setAdminView("list")}
-      />
-    ) : (
-      <AdminSessionsListPage
-        onSelect={(id) => setManualSessionId(id)}
-        onCreateNew={() => setAdminView("create")}
-      />
+    return (
+      <div className="mx-auto max-w-md px-4 pt-6">
+        <UserProfileBar />
+        <div className="mt-6">
+          {adminView === "create" ? (
+            <CreateQuestionPage
+              onCreated={(id) => setManualSessionId(id)}
+              onCancel={() => setAdminView("list")}
+            />
+          ) : (
+            <AdminSessionsListPage
+              onSelect={(id) => setManualSessionId(id)}
+              onCreateNew={() => setAdminView("create")}
+            />
+          )}
+        </div>
+      </div>
     );
   }
 
   if (!sessionId) {
-    return (
-      <SessionIdGate
-        onSubmit={(id) => setManualSessionId(id)}
-        isAdmin={isAdmin}
-      />
-    );
+    return <SessionIdGate onSubmit={(id) => setManualSessionId(id)} />;
   }
 
   return isAdmin ? (
@@ -66,36 +67,35 @@ export default function App() {
   );
 }
 
-function SessionIdGate({
-  onSubmit,
-  isAdmin,
-}: {
-  onSubmit: (id: string) => void;
-  isAdmin: boolean;
-}) {
+function SessionIdGate({ onSubmit }: { onSubmit: (id: string) => void }) {
   const [value, setValue] = useState("");
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
-      <p className="font-display text-lg font-semibold text-white">
-        {isAdmin
-          ? "Nhập mã phiên bình chọn để điều khiển"
-          : "Nhập mã phiên bình chọn"}
-      </p>
-      <p className="mt-2 max-w-xs text-sm text-white/50">
-        MC sẽ chia sẻ link hoặc mã phiên. Bạn cũng có thể vào trực tiếp qua link
-        dạng <code className="text-white/70">?session=&lt;id&gt;</code>.
-      </p>
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-6 text-center">
+      <div className="w-full max-w-xs">
+        <UserProfileBar />
+      </div>
+
+      <div>
+        <p className="font-display text-lg font-semibold text-white">
+          Nhập mã câu hỏi
+        </p>
+        <p className="mt-2 max-w-xs text-sm text-white/50">
+          MC sẽ chia sẻ link hoặc mã câu hỏi. Bạn cũng có thể vào trực tiếp qua
+          link dạng <code className="text-white/70">?session=&lt;id&gt;</code>.
+        </p>
+      </div>
+
       <form
         onSubmit={(e) => {
           e.preventDefault();
           if (value.trim()) onSubmit(value.trim());
         }}
-        className="mt-6 flex w-full max-w-xs flex-col gap-3"
+        className="flex w-full max-w-xs flex-col gap-3"
       >
         <input
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          placeholder="session id"
+          placeholder="mã câu hỏi"
           className="rounded-xl border border-white/10 bg-stage-800 px-4 py-3 text-white
             placeholder:text-white/30 focus:border-amber focus:outline-none"
         />
