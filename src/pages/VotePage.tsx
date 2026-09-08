@@ -1,0 +1,144 @@
+import { useEffect, useState } from 'react';
+import { api, type ResultsInfo } from '../lib/api';
+import { useSessionState } from '../hooks/useSessionState';
+import { CountdownRing } from '../components/CountdownRing';
+import { OptionTile } from '../components/OptionTile';
+import { ResultsBoard } from '../components/ResultsBoard';
+import { useAuth } from '../hooks/useAuth';
+
+export function VotePage({ sessionId }: { sessionId: string }) {
+  const { signOut } = useAuth();
+  const { session, error, displaySeconds } = useSessionState(sessionId);
+  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
+  const [selecting, setSelecting] = useState(false);
+  const [voterCount, setVoterCount] = useState<number | null>(null);
+  const [results, setResults] = useState<ResultsInfo | null>(null);
+  const [joinError, setJoinError] = useState<string | null>(null);
+
+  // Join 1 lần khi vào phòng.
+  useEffect(() => {
+    api.join(sessionId).catch((err) => setJoinError(err.message));
+  }, [sessionId]);
+
+  // Poll số lượng đã bình chọn trong lúc đang mở/tạm dừng.
+  useEffect(() => {
+    if (!session || session.status === 'closed') return;
+    const poll = () => api.selectionCount(sessionId).then((r) => setVoterCount(r.count)).catch(() => {});
+    poll();
+    const id = setInterval(poll, 2000);
+    return () => clearInterval(id);
+  }, [sessionId, session?.status]);
+
+  // Khi đóng, tự động lấy kết quả.
+  useEffect(() => {
+    if (session?.status === 'closed' && !results) {
+      api.getResults(sessionId).then(setResults).catch(() => {});
+    }
+  }, [session?.status, sessionId, results]);
+
+  async function handleSelect(optionId: string) {
+    if (session?.status !== 'active' || selecting) return;
+    setSelecting(true);
+    const previous = selectedOptionId;
+    setSelectedOptionId(optionId); // optimistic
+    try {
+      await api.select(sessionId, optionId);
+    } catch (err) {
+      setSelectedOptionId(previous); // rollback
+    } finally {
+      setSelecting(false);
+    }
+  }
+
+  if (error) {
+    return <CenteredMessage title="Không tải được phiên bình chọn" detail={error} />;
+  }
+
+  if (!session) {
+    return <CenteredMessage title="Đang tải..." />;
+  }
+
+  return (
+    <div className="mx-auto flex min-h-screen max-w-md flex-col px-4 pb-10 pt-6">
+      <header className="mb-6 flex items-center justify-between">
+        <span className="font-display text-sm font-semibold uppercase tracking-wide text-white/40">
+          Bình chọn văn nghệ
+        </span>
+        <button onClick={signOut} className="text-xs text-white/40 underline underline-offset-2">
+          Đăng xuất
+        </button>
+      </header>
+
+      <h1 className="font-display text-2xl font-bold leading-tight text-white">{session.question}</h1>
+
+      {joinError && <p className="mt-2 text-xs text-coral">{joinError}</p>}
+
+      <div className="mt-6 flex flex-1 flex-col items-center">
+        {session.status === 'pending' && (
+          <WaitingPanel voterCount={voterCount} />
+        )}
+
+        {(session.status === 'active' || session.status === 'paused') && (
+          <>
+            <CountdownRing
+              seconds={displaySeconds ?? 0}
+              totalSeconds={session.duration_seconds ?? 30}
+              paused={session.status === 'paused'}
+            />
+            {voterCount != null && (
+              <p className="mt-3 text-sm text-white/50">{voterCount} người đã bình chọn</p>
+            )}
+            <div className="mt-6 flex w-full flex-col gap-3">
+              {session.options.map((opt, i) => (
+                <OptionTile
+                  key={opt.id}
+                  index={i}
+                  label={opt.label}
+                  selected={selectedOptionId === opt.id}
+                  disabled={session.status !== 'active'}
+                  onSelect={() => handleSelect(opt.id)}
+                />
+              ))}
+            </div>
+            {session.status === 'paused' && (
+              <p className="mt-4 text-center text-sm text-sky">
+                MC đang tạm dừng bình chọn, vui lòng chờ...
+              </p>
+            )}
+          </>
+        )}
+
+        {session.status === 'closed' && (
+          <div className="flex w-full flex-col items-center">
+            <h2 className="mb-4 font-display text-xl font-bold text-amber">Kết quả bình chọn</h2>
+            {results ? <ResultsBoard results={results} /> : <p className="text-white/50">Đang tải kết quả...</p>}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function WaitingPanel({ voterCount }: { voterCount: number | null }) {
+  return (
+    <div className="flex flex-col items-center pt-8 text-center">
+      <div className="mb-5 h-3 w-3 animate-pulseSlow rounded-full bg-amber" />
+      <p className="font-display text-lg font-semibold text-white/90">
+        Chờ MC bắt đầu bình chọn
+      </p>
+      <p className="mt-2 max-w-xs text-sm text-white/50">
+        Các đáp án đang bị khóa. Khi MC bấm bắt đầu, bộ đếm giờ sẽ hiện ra và bạn có thể chọn.
+      </p>
+      {voterCount != null && <p className="mt-4 text-xs text-white/40">{voterCount} người đã sẵn sàng</p>}
+    </div>
+  );
+}
+
+function CenteredMessage({ title, detail }: { title: string; detail?: string }) {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
+      <p className="font-display text-lg font-semibold text-white">{title}</p>
+      {detail && <p className="mt-2 text-sm text-white/50">{detail}</p>}
+    </div>
+  );
+}

@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background-color: #17102b;
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(255, 182, 39, 0.10), transparent 40%),
+    radial-gradient(circle at 85% 90%, rgba(76, 154, 255, 0.12), transparent 45%);
+  color: #f4f1fb;
+  font-family: 'Inter', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+* {
+  scrollbar-width: thin;
+}
+
+:focus-visible {
+  outline: 3px solid #ffb627;
+  outline-offset: 2px;
+}
