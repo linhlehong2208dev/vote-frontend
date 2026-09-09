@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
-import { api, type ResultsInfo } from '../lib/api';
-import { useSessionState } from '../hooks/useSessionState';
-import { CountdownRing } from '../components/CountdownRing';
-import { OptionTile } from '../components/OptionTile';
-import { ResultsBoard } from '../components/ResultsBoard';
-import { useAuth } from '../hooks/useAuth';
+import { useEffect, useState } from "react";
+import { api, type ResultsInfo } from "../lib/api";
+import { useSessionState } from "../hooks/useSessionState";
+import { CountdownRing } from "../components/CountdownRing";
+import { OptionTile } from "../components/OptionTile";
+import { ResultsBoard } from "../components/ResultsBoard";
+import { useAuth } from "../hooks/useAuth";
 
 export function VotePage({ sessionId }: { sessionId: string }) {
   const { signOut } = useAuth();
@@ -15,6 +15,16 @@ export function VotePage({ sessionId }: { sessionId: string }) {
   const [results, setResults] = useState<ResultsInfo | null>(null);
   const [joinError, setJoinError] = useState<string | null>(null);
 
+  // Chỉ được bình chọn khi session đang active VÀ vẫn còn thời gian.
+  //
+  // displaySeconds === null:
+  // Chưa có dữ liệu timer => khóa tạm thời để tránh vote nhầm
+  // trong khoảng thời gian frontend đang khởi tạo timer.
+  const canVote =
+    session?.status === "active" &&
+    displaySeconds !== null &&
+    displaySeconds > 0;
+
   // Join 1 lần khi vào phòng.
   useEffect(() => {
     api.join(sessionId).catch((err) => setJoinError(err.message));
@@ -22,36 +32,62 @@ export function VotePage({ sessionId }: { sessionId: string }) {
 
   // Poll số lượng đã bình chọn trong lúc đang mở/tạm dừng.
   useEffect(() => {
-    if (!session || session.status === 'closed') return;
-    const poll = () => api.selectionCount(sessionId).then((r) => setVoterCount(r.count)).catch(() => {});
+    if (!session || session.status === "closed") return;
+
+    const poll = () =>
+      api
+        .selectionCount(sessionId)
+        .then((r) => setVoterCount(r.count))
+        .catch(() => {});
+
     poll();
+
     const id = setInterval(poll, 2000);
+
     return () => clearInterval(id);
   }, [sessionId, session?.status]);
 
   // Khi đóng, tự động lấy kết quả.
   useEffect(() => {
-    if (session?.status === 'closed' && !results) {
-      api.getResults(sessionId).then(setResults).catch(() => {});
+    if (session?.status === "closed" && !results) {
+      api
+        .getResults(sessionId)
+        .then(setResults)
+        .catch(() => {});
     }
   }, [session?.status, sessionId, results]);
 
   async function handleSelect(optionId: string) {
-    if (session?.status !== 'active' || selecting) return;
+    // Frontend chặn vote khi:
+    // - session không active
+    // - timer chưa sẵn sàng
+    // - timer đã hết
+    // - đang gửi một request vote khác
+    if (!canVote || selecting) return;
+
     setSelecting(true);
+
     const previous = selectedOptionId;
-    setSelectedOptionId(optionId); // optimistic
+
+    // Optimistic UI
+    setSelectedOptionId(optionId);
+
     try {
       await api.select(sessionId, optionId);
     } catch (err) {
-      setSelectedOptionId(previous); // rollback
+      // Backend vẫn là nguồn sự thật.
+      // Nếu backend từ chối (ví dụ vừa hết deadline),
+      // rollback lựa chọn trên UI.
+      setSelectedOptionId(previous);
     } finally {
       setSelecting(false);
     }
   }
 
   if (error) {
-    return <CenteredMessage title="Không tải được phiên bình chọn" detail={error} />;
+    return (
+      <CenteredMessage title="Không tải được phiên bình chọn" detail={error} />
+    );
   }
 
   if (!session) {
@@ -64,30 +100,40 @@ export function VotePage({ sessionId }: { sessionId: string }) {
         <span className="font-display text-sm font-semibold uppercase tracking-wide text-white/40">
           Bình chọn văn nghệ
         </span>
-        <button onClick={signOut} className="text-xs text-white/40 underline underline-offset-2">
+
+        <button
+          onClick={signOut}
+          className="text-xs text-white/40 underline underline-offset-2"
+        >
           Đăng xuất
         </button>
       </header>
 
-      <h1 className="font-display text-2xl font-bold leading-tight text-white">{session.question}</h1>
+      <h1 className="font-display text-2xl font-bold leading-tight text-white">
+        {session.question}
+      </h1>
 
       {joinError && <p className="mt-2 text-xs text-coral">{joinError}</p>}
 
       <div className="mt-6 flex flex-1 flex-col items-center">
-        {session.status === 'pending' && (
+        {session.status === "pending" && (
           <WaitingPanel voterCount={voterCount} />
         )}
 
-        {(session.status === 'active' || session.status === 'paused') && (
+        {(session.status === "active" || session.status === "paused") && (
           <>
             <CountdownRing
               seconds={displaySeconds ?? 0}
               totalSeconds={session.duration_seconds ?? 30}
-              paused={session.status === 'paused'}
+              paused={session.status === "paused"}
             />
+
             {voterCount != null && (
-              <p className="mt-3 text-sm text-white/50">{voterCount} người đã bình chọn</p>
+              <p className="mt-3 text-sm text-white/50">
+                {voterCount} người đã bình chọn
+              </p>
             )}
+
             <div className="mt-6 flex w-full flex-col gap-3">
               {session.options.map((opt, i) => (
                 <OptionTile
@@ -95,23 +141,37 @@ export function VotePage({ sessionId }: { sessionId: string }) {
                   index={i}
                   label={opt.label}
                   selected={selectedOptionId === opt.id}
-                  disabled={session.status !== 'active'}
+                  disabled={!canVote || selecting}
                   onSelect={() => handleSelect(opt.id)}
                 />
               ))}
             </div>
-            {session.status === 'paused' && (
+
+            {session.status === "paused" && (
               <p className="mt-4 text-center text-sm text-sky">
                 MC đang tạm dừng bình chọn, vui lòng chờ...
+              </p>
+            )}
+
+            {session.status === "active" && displaySeconds === 0 && (
+              <p className="mt-4 text-center text-sm text-coral">
+                Đã hết thời gian bình chọn.
               </p>
             )}
           </>
         )}
 
-        {session.status === 'closed' && (
+        {session.status === "closed" && (
           <div className="flex w-full flex-col items-center">
-            <h2 className="mb-4 font-display text-xl font-bold text-amber">Kết quả bình chọn</h2>
-            {results ? <ResultsBoard results={results} /> : <p className="text-white/50">Đang tải kết quả...</p>}
+            <h2 className="mb-4 font-display text-xl font-bold text-amber">
+              Kết quả bình chọn
+            </h2>
+
+            {results ? (
+              <ResultsBoard results={results} />
+            ) : (
+              <p className="text-white/50">Đang tải kết quả...</p>
+            )}
           </div>
         )}
       </div>
@@ -123,21 +183,36 @@ function WaitingPanel({ voterCount }: { voterCount: number | null }) {
   return (
     <div className="flex flex-col items-center pt-8 text-center">
       <div className="mb-5 h-3 w-3 animate-pulseSlow rounded-full bg-amber" />
+
       <p className="font-display text-lg font-semibold text-white/90">
         Chờ MC bắt đầu bình chọn
       </p>
+
       <p className="mt-2 max-w-xs text-sm text-white/50">
-        Các đáp án đang bị khóa. Khi MC bấm bắt đầu, bộ đếm giờ sẽ hiện ra và bạn có thể chọn.
+        Các đáp án đang bị khóa. Khi MC bấm bắt đầu, bộ đếm giờ sẽ hiện ra và
+        bạn có thể chọn.
       </p>
-      {voterCount != null && <p className="mt-4 text-xs text-white/40">{voterCount} người đã sẵn sàng</p>}
+
+      {voterCount != null && (
+        <p className="mt-4 text-xs text-white/40">
+          {voterCount} người đã sẵn sàng
+        </p>
+      )}
     </div>
   );
 }
 
-function CenteredMessage({ title, detail }: { title: string; detail?: string }) {
+function CenteredMessage({
+  title,
+  detail,
+}: {
+  title: string;
+  detail?: string;
+}) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
       <p className="font-display text-lg font-semibold text-white">{title}</p>
+
       {detail && <p className="mt-2 text-sm text-white/50">{detail}</p>}
     </div>
   );
