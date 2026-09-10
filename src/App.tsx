@@ -29,12 +29,19 @@ export default function App() {
   const [game, setGame] = useState<GameInfo | null>(null);
   const [gameLoading, setGameLoading] = useState(false);
   const [gameError, setGameError] = useState("");
+  const [, setRouteVersion] = useState(0);
 
   const path = getPath();
   const gamePin = getGamePinFromUrl();
   const urlSessionId = getSessionIdFromUrl();
   const joinCode = getJoinCodeFromUrl() ?? manualJoinCode;
   const isAdmin = isAdminEmail(profile?.email);
+
+  useEffect(() => {
+    const handlePopState = () => setRouteVersion(v => v + 1);
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   useEffect(() => {
     if (loading || !session) return;
@@ -87,7 +94,7 @@ export default function App() {
     if (path.startsWith("/admin/games/") && path !== "/admin/games/new") {
       const id=path.split("/").pop()??"";
       if (path.endsWith("/present")) return <FullScreenMessage text="Đang mở Presentation…" />;
-      return <GameManagementPage gameId={id} onLobby={async()=>{const g=await api.enterGameLobby(id);setGame(g.game);navigate(`/game/${g.game.pin}`)}} onEdit={()=>navigate(`/admin/games/${id}/edit`)} onBack={()=>navigate("/admin/games")} />;
+      return <GameManagementPage gameId={id} onLobby={async()=>{ const g=await api.enterGameLobby(id); setGame(g.game); navigate(`/game/${g.game.pin}/present`); }} onEdit={()=>navigate(`/admin/games/${id}/edit`)} onBack={()=>navigate("/admin/games")} />;
     }
     return <AdminHomePage onCreate={()=>{setAdminView("create");navigate("/admin/games/new")}} onOpen={id=>navigate(`/admin/games/${id}`)} />;
   }
