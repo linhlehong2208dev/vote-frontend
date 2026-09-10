@@ -11,7 +11,7 @@ export function VotePage({ sessionId }: { sessionId: string }) {
   const { session, error, displaySeconds } = useSessionState(sessionId);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [selecting, setSelecting] = useState(false);
-  const [voterCount, setVoterCount] = useState<number | null>(null);
+  const [joinedCount, setJoinedCount] = useState<number | null>(null);
   const [results, setResults] = useState<ResultsInfo | null>(null);
   const [joinError, setJoinError] = useState<string | null>(null);
 
@@ -25,37 +25,41 @@ export function VotePage({ sessionId }: { sessionId: string }) {
     displaySeconds !== null &&
     displaySeconds > 0;
 
-  // Join 1 lần khi vào phòng.
+  // Mỗi vòng vote cần một log join. Khi session được "Bắt đầu lại", backend
+  // xóa log của vòng cũ nên effect này phải chạy lại khi status đổi từ closed -> active.
   useEffect(() => {
+    if (!session || session.status === "closed") return;
     api.join(sessionId).catch((err) => setJoinError(err.message));
-  }, [sessionId]);
+  }, [sessionId, session?.status]);
 
-  // Poll số lượng đã bình chọn trong lúc đang mở/tạm dừng.
+  // Đếm số người đã JOIN (không phải số người đã vote). Polling nhẹ 1.5s giúp
+  // màn hình chờ cập nhật ngay cả khi Realtime chưa kịp kết nối.
   useEffect(() => {
     if (!session || session.status === "closed") return;
 
     const poll = () =>
       api
-        .selectionCount(sessionId)
-        .then((r) => setVoterCount(r.count))
+        .joinedCount(sessionId)
+        .then((r) => setJoinedCount(r.count))
         .catch(() => {});
 
     poll();
-
-    const id = setInterval(poll, 2000);
-
+    const id = setInterval(poll, 1500);
     return () => clearInterval(id);
   }, [sessionId, session?.status]);
 
-  // Khi đóng, tự động lấy kết quả.
+  // Khi đóng, tự động lấy kết quả. Khi mở lại vòng mới, xóa kết quả cũ ngay.
   useEffect(() => {
-    if (session?.status === "closed" && !results) {
+    if (session?.status === "closed") {
       api
         .getResults(sessionId)
         .then(setResults)
         .catch(() => {});
+    } else {
+      setResults(null);
+      setSelectedOptionId(null);
     }
-  }, [session?.status, sessionId, results]);
+  }, [session?.status, sessionId]);
 
   async function handleSelect(optionId: string) {
     // Frontend chặn vote khi:
@@ -117,7 +121,7 @@ export function VotePage({ sessionId }: { sessionId: string }) {
 
       <div className="mt-6 flex flex-1 flex-col items-center">
         {session.status === "pending" && (
-          <WaitingPanel voterCount={voterCount} />
+          <WaitingPanel joinedCount={joinedCount} />
         )}
 
         {(session.status === "active" || session.status === "paused") && (
@@ -128,9 +132,9 @@ export function VotePage({ sessionId }: { sessionId: string }) {
               paused={session.status === "paused"}
             />
 
-            {voterCount != null && (
+            {joinedCount != null && (
               <p className="mt-3 text-sm text-white/50">
-                {voterCount} người đã bình chọn
+                {joinedCount} người đã sẵn sàng
               </p>
             )}
 
@@ -179,7 +183,7 @@ export function VotePage({ sessionId }: { sessionId: string }) {
   );
 }
 
-function WaitingPanel({ voterCount }: { voterCount: number | null }) {
+function WaitingPanel({ joinedCount }: { joinedCount: number | null }) {
   return (
     <div className="flex flex-col items-center pt-8 text-center">
       <div className="mb-5 h-3 w-3 animate-pulseSlow rounded-full bg-amber" />
@@ -193,9 +197,9 @@ function WaitingPanel({ voterCount }: { voterCount: number | null }) {
         bạn có thể chọn.
       </p>
 
-      {voterCount != null && (
+      {joinedCount != null && (
         <p className="mt-4 text-xs text-white/40">
-          {voterCount} người đã sẵn sàng
+          {joinedCount} người đã sẵn sàng
         </p>
       )}
     </div>

@@ -51,6 +51,13 @@ export function AdminPage({ sessionId }: { sessionId: string }) {
 
     void refreshStats();
 
+    // Realtime là đường cập nhật chính. Polling 1.5s là fallback để Admin vẫn
+    // cập nhật ngay cả khi browser/Supabase Realtime không giao event (ví dụ
+    // tab mobile ngủ hoặc subscription vừa reconnect). Không cần F5.
+    const pollId = setInterval(() => {
+      void refreshStats();
+    }, 1500);
+
     const channel = supabase
       .channel(`live-stats-${sessionId}`)
       .on(
@@ -77,6 +84,7 @@ export function AdminPage({ sessionId }: { sessionId: string }) {
 
     return () => {
       if (timer) clearTimeout(timer);
+      clearInterval(pollId);
       void supabase.removeChannel(channel);
     };
   }, [sessionId, session?.status]);

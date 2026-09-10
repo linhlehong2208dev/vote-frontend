@@ -98,6 +98,9 @@ export const api = {
   selectionCount: (sessionId: string) =>
     request<{ count: number }>(`/api/select/count/${sessionId}`),
 
+  joinedCount: (sessionId: string) =>
+    request<{ count: number }>(`/api/session/${sessionId}/joined-count`),
+
   getSession: (sessionId: string) =>
     request<SessionInfo>(`/api/session/${sessionId}`),
 
