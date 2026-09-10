@@ -20,6 +20,7 @@ export interface SessionInfo {
   ended_at: string | null;
   remaining_seconds: number | null;
   paused_at: string | null;
+  join_code: string | null;
   options: OptionInfo[];
 }
 
@@ -27,7 +28,16 @@ export interface SessionSummary {
   id: string;
   question: string;
   status: SessionStatus;
+  join_code: string | null;
   created_at: string;
+}
+
+
+export interface LiveStats {
+  joinedCount: number;
+  votedCount: number;
+  waitingCount: number;
+  optionCounts: Record<string, number>;
 }
 
 export interface ResultsInfo {
@@ -91,13 +101,21 @@ export const api = {
   getSession: (sessionId: string) =>
     request<SessionInfo>(`/api/session/${sessionId}`),
 
+  getSessionByCode: (code: string) =>
+    request<{ session: { id: string; question: string; status: SessionStatus; join_code: string } }>(
+      `/api/session/code/${encodeURIComponent(code.trim().toUpperCase())}`,
+    ),
+
   // Tạo câu hỏi mới (admin only). Trả về session vừa tạo (status='pending')
   // kèm id để FE tự build link/QR chia sẻ, không cần gọi lại getSession.
-  createSession: (question: string, options: string[]) =>
+  createSession: (question: string, options: string[], joinCode?: string) =>
     request<{ ok: true; session: SessionSummary }>("/api/session", {
       method: "POST",
-      body: JSON.stringify({ question, options }),
+      body: JSON.stringify({ question, options, joinCode }),
     }),
+
+  getLiveStats: (sessionId: string) =>
+    request<LiveStats>(`/api/session/${sessionId}/live-stats`),
 
   // Danh sách toàn bộ câu hỏi đã tạo (admin only) - phục vụ trang quản lý.
   listSessions: () => request<{ sessions: SessionSummary[] }>("/api/sessions"),

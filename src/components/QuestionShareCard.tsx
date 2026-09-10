@@ -4,9 +4,10 @@ import { QRCodeSVG } from "qrcode.react";
 interface QuestionShareCardProps {
   url: string;
   question: string;
+  code?: string | null;
 }
 
-export function QuestionShareCard({ url, question }: QuestionShareCardProps) {
+export function QuestionShareCard({ url, question, code }: QuestionShareCardProps) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -24,6 +25,12 @@ export function QuestionShareCard({ url, question }: QuestionShareCardProps) {
       <p className="mb-3 text-center font-display text-sm font-semibold text-white/90 line-clamp-2">
         {question}
       </p>
+      {code && (
+        <div className="mb-3 rounded-xl border border-amber/20 bg-amber/10 px-4 py-3 text-center">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">Mã tham gia</p>
+          <p className="mt-1 font-mono text-3xl font-black tracking-[0.3em] text-amber">{code}</p>
+        </div>
+      )}
       <div className="flex justify-center rounded-xl bg-white p-3">
         <QRCodeSVG value={url} size={180} />
       </div>

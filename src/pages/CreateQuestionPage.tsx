@@ -2,8 +2,8 @@ import { useState, type FormEvent } from "react";
 import { api, ApiError, type SessionSummary } from "../lib/api";
 import { QuestionShareCard } from "../components/QuestionShareCard";
 
-function buildVoteUrl(sessionId: string) {
-  return `${window.location.origin}${window.location.pathname.replace(/\/admin\/?$/, "/")}?session=${sessionId}`;
+function buildVoteUrl(joinCode: string) {
+  return `${window.location.origin}/join/${encodeURIComponent(joinCode)}`;
 }
 
 interface CreateQuestionPageProps {
@@ -15,6 +15,7 @@ export function CreateQuestionPage({
   onCreated,
   onCancel,
 }: CreateQuestionPageProps) {
+  const [joinCode, setJoinCode] = useState("");
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState(["", ""]);
   const [busy, setBusy] = useState(false);
@@ -35,6 +36,10 @@ export function CreateQuestionPage({
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const cleanOptions = options.map((o) => o.trim()).filter(Boolean);
+    if (!joinCode.trim()) return setError("Vui lòng nhập mã câu hỏi.");
+    if (!/^[A-Za-z0-9]{3,8}$/.test(joinCode.trim())) {
+      return setError("Mã câu hỏi phải có 3-8 ký tự chữ hoặc số.");
+    }
     if (!question.trim()) return setError("Vui lòng nhập câu hỏi.");
     if (cleanOptions.length < 2) return setError("Cần tối thiểu 2 lựa chọn.");
 
@@ -44,6 +49,7 @@ export function CreateQuestionPage({
       const { session } = await api.createSession(
         question.trim(),
         cleanOptions,
+        joinCode.trim().toUpperCase(),
       );
       setCreated(session);
     } catch (err) {
@@ -54,13 +60,13 @@ export function CreateQuestionPage({
   }
 
   if (created) {
-    const url = buildVoteUrl(created.id);
+    const url = buildVoteUrl(created.join_code ?? "");
     return (
       <div className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-6 px-4 py-10">
         <p className="font-display text-lg font-semibold text-emerald">
           Đã tạo câu hỏi!
         </p>
-        <QuestionShareCard url={url} question={created.question} />
+        <QuestionShareCard url={url} question={created.question} code={created.join_code} />
         <div className="flex w-full gap-3">
           <button
             onClick={() => onCreated(created.id)}
@@ -72,6 +78,7 @@ export function CreateQuestionPage({
           <button
             onClick={() => {
               setCreated(null);
+              setJoinCode("");
               setQuestion("");
               setOptions(["", ""]);
             }}
@@ -109,6 +116,20 @@ export function CreateQuestionPage({
         Tạo câu hỏi mới
       </h1>
       <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+        <label className="flex flex-col gap-1.5 text-sm text-white/70">
+          Mã câu hỏi
+          <input
+            value={joinCode}
+            onChange={(e) => setJoinCode(e.target.value.replace(/[^a-zA-Z0-9]/g, "").slice(0, 8).toUpperCase())}
+            placeholder="VN01"
+            maxLength={8}
+            autoCapitalize="characters"
+            className="rounded-xl border border-white/10 bg-stage-800 px-4 py-3 font-mono font-semibold tracking-widest text-white
+              placeholder:text-white/30 focus:border-amber focus:outline-none"
+          />
+          <span className="text-xs text-white/35">3-8 ký tự chữ hoặc số. User sẽ vào bằng link /join/VN01.</span>
+        </label>
+
         <label className="flex flex-col gap-1.5 text-sm text-white/70">
           Câu hỏi
           <textarea

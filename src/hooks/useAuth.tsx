@@ -64,15 +64,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function signInWithGoogle() {
+    // Giữ lại URL phòng hiện tại để sau khi Google OAuth quay về root,
+    // App có thể đưa user trở lại đúng /join/VN01.
+    const returnPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    if (returnPath.startsWith("/join/") || window.location.search.includes("session=")) {
+      sessionStorage.setItem("vote_auth_return_path", returnPath);
+    } else {
+      sessionStorage.removeItem("vote_auth_return_path");
+    }
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        // Chỉ lấy domain gốc (bỏ path/query/hash) để tránh redirect lệch khỏi
-        // pattern đã khai báo trong Supabase Redirect URLs.
+        // Giữ origin để không phải khai báo từng /join/<code> trong Supabase Redirect URLs.
         redirectTo: window.location.origin,
-        // Chỉ là gợi ý UI cho Google (lọc account hiển thị theo domain Workspace),
-        // KHÔNG phải kiểm tra bảo mật thật - domain thật vẫn được backend
-        // (authMiddleware) verify lại trên mọi request bằng ALLOWED_EMAIL_DOMAIN.
         ...(ALLOWED_DOMAIN_HINT
           ? { queryParams: { hd: ALLOWED_DOMAIN_HINT } }
           : {}),

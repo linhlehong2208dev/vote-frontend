@@ -54,6 +54,7 @@ export function AdminSessionsListPage({
               {s.question}
             </p>
             <p className="mt-1 text-xs text-white/40">
+              Mã <span className="font-mono font-semibold text-amber">{s.join_code ?? "—"}</span> ·{" "}
               {STATUS_LABELS[s.status] ?? s.status} ·{" "}
               {new Date(s.created_at).toLocaleString("vi-VN")}
             </p>
