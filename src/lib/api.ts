@@ -46,6 +46,59 @@ export interface ResultsInfo {
   totalParticipants: number;
 }
 
+
+export type GameStatus = "draft" | "lobby" | "active" | "closed";
+export type GameBackgroundType = "color" | "gradient" | "image";
+
+export interface GameQuestion {
+  id: string;
+  question: string;
+  status: SessionStatus;
+  duration_seconds: number | null;
+  started_at: string | null;
+  ended_at: string | null;
+  remaining_seconds: number | null;
+  paused_at: string | null;
+  game_id: string;
+  sort_order: number;
+  background_type: GameBackgroundType | null;
+  background_value: string | null;
+  image_url: string | null;
+  options?: OptionInfo[];
+}
+
+export interface GameInfo {
+  id: string;
+  title: string;
+  pin: string;
+  status: GameStatus;
+  cover_url: string | null;
+  background_type: GameBackgroundType;
+  background_value: string | null;
+  current_session_id: string | null;
+  created_at: string;
+  updated_at?: string;
+  questions?: GameQuestion[];
+}
+
+export interface CreateGameQuestionInput {
+  question: string;
+  options: string[];
+  durationSeconds?: number | null;
+  imageUrl?: string | null;
+  backgroundType?: GameBackgroundType;
+  backgroundValue?: string | null;
+}
+
+export interface CreateGameInput {
+  title: string;
+  pin?: string;
+  coverUrl?: string | null;
+  backgroundType?: GameBackgroundType;
+  backgroundValue?: string | null;
+  questions: CreateGameQuestionInput[];
+}
+
 export class ApiError extends Error {
   code: string;
   status: number;
@@ -152,4 +205,47 @@ export const api = {
 
   getResults: (sessionId: string) =>
     request<ResultsInfo>(`/api/results/${sessionId}`),
+  createGame: (input: CreateGameInput) =>
+    request<{ ok: true; game: GameInfo }>("/api/games", {
+      method: "POST", body: JSON.stringify(input),
+    }),
+
+  listGames: () => request<{ games: GameInfo[] }>("/api/games"),
+
+  getGame: (gameId: string) =>
+    request<{ game: GameInfo }>(`/api/games/${gameId}`),
+
+  getGameByPin: (pin: string) =>
+    request<{ game: GameInfo }>(`/api/games/pin/${encodeURIComponent(pin.trim().toUpperCase())}`),
+
+  joinGame: (gameId: string, displayName: string) =>
+    request<{ ok: true }>(`/api/games/${gameId}/join`, {
+      method: "POST", body: JSON.stringify({ displayName }),
+    }),
+
+  getGameParticipantCount: (gameId: string) =>
+    request<{ count: number }>(`/api/games/${gameId}/participants/count`),
+
+  enterGameLobby: (gameId: string) =>
+    request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}/lobby`, { method: "POST" }),
+
+  startGame: (gameId: string) =>
+    request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}/start`, { method: "POST" }),
+
+  nextGameQuestion: (gameId: string) =>
+    request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}/next`, { method: "POST" }),
+
+  closeGame: (gameId: string) =>
+    request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}/close`, { method: "POST" }),
+
+  getGameLiveStats: (gameId: string) =>
+    request<LiveStats & { participantCount: number; currentSessionId?: string }>(
+      `/api/games/${gameId}/stats`,
+    ),
+
+  getQuestionVoters: (gameId: string, questionId: string, optionId?: string) =>
+    request<{ voters: { userId: string; displayName: string; optionId: string | null }[] }>(
+      `/api/games/${gameId}/questions/${questionId}/voters${optionId ? `?optionId=${encodeURIComponent(optionId)}` : ""}`,
+    ),
+
 };

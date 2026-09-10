@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -14,7 +16,7 @@ body {
     radial-gradient(circle at 15% 10%, rgba(255, 182, 39, 0.10), transparent 40%),
     radial-gradient(circle at 85% 90%, rgba(76, 154, 255, 0.12), transparent 45%);
   color: #f4f1fb;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -25,4 +27,11 @@ body {
 :focus-visible {
   outline: 3px solid #ffb627;
   outline-offset: 2px;
+}
+
+@layer components {
+  .field-label { @apply mb-2 block text-xs font-extrabold uppercase tracking-[0.12em] text-white/45; }
+  .field-label em { @apply font-medium normal-case tracking-normal text-white/20; font-style: normal; }
+  .field-input { @apply w-full rounded-2xl border border-white/10 bg-stage-800 px-4 py-3.5 text-sm font-semibold text-white placeholder:text-white/20 focus:border-amber focus:outline-none focus:ring-2 focus:ring-amber/10; }
+  .field-input option { background: #1f1638; color: white; }
 }

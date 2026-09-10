@@ -25,8 +25,8 @@ export default {
         },
       },
       fontFamily: {
-        display: ['"Space Grotesk"', 'sans-serif'],
-        body: ['"Inter"', 'sans-serif'],
+        display: ['Montserrat', 'sans-serif'],
+        body: ['Montserrat', 'sans-serif'],
       },
       boxShadow: {
         tile: '0 6px 0 0 rgba(0,0,0,0.25)',
