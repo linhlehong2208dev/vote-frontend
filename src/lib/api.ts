@@ -46,6 +46,28 @@ export interface ResultsInfo {
   totalParticipants: number;
 }
 
+export interface GameQuestionDashboard {
+  questionId: string;
+  questionNumber: number;
+  question: string;
+  status: SessionStatus;
+  startedAt: string | null;
+  endedAt: string | null;
+  totalVotes: number;
+  noAnswerCount: number;
+  ranking: { optionId: string; label: string; votes: number }[];
+  history: { questionId: string; questionNumber: number; question: string; optionId: string | null; optionLabel: string; timestamp: string }[];
+}
+
+export interface GameDashboard {
+  game: { id: string; title: string; pin: string; status: GameStatus; createdAt: string; updatedAt: string };
+  participantCount: number;
+  totalVotes: number;
+  questions: GameQuestionDashboard[];
+  voteHistory: GameQuestionDashboard["history"];
+  participantJoinTimestamps: string[];
+}
+
 
 export type GameStatus = "draft" | "lobby" | "active" | "closed";
 export type GameBackgroundType = "color" | "gradient" | "image";
@@ -247,6 +269,9 @@ export const api = {
     request<LiveStats & { participantCount: number; currentSessionId?: string }>(
       `/api/games/${gameId}/stats`,
     ),
+
+  getGameDashboard: (gameId: string) =>
+    request<GameDashboard>(`/api/games/${gameId}/dashboard`),
 
   getQuestionVoters: (gameId: string, questionId: string, optionId?: string) =>
     request<{ voters: { userId: string; displayName: string; optionId: string | null }[] }>(

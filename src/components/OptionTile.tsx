@@ -1,37 +1,3 @@
-type TileColor = 'coral' | 'sky' | 'amber' | 'emerald';
-
-const COLOR_MAP: Record<TileColor, string> = {
-  coral: 'bg-coral',
-  sky: 'bg-sky',
-  amber: 'bg-amber text-stage-900',
-  emerald: 'bg-emerald text-stage-900',
-};
-
-const SHAPES: Record<TileColor, JSX.Element> = {
-  coral: (
-    <svg viewBox="0 0 24 24" className="h-6 w-6 fill-current">
-      <path d="M12 3 L21 20 L3 20 Z" />
-    </svg>
-  ),
-  sky: (
-    <svg viewBox="0 0 24 24" className="h-6 w-6 fill-current">
-      <path d="M12 2 L22 12 L12 22 L2 12 Z" />
-    </svg>
-  ),
-  amber: (
-    <svg viewBox="0 0 24 24" className="h-6 w-6 fill-current">
-      <circle cx="12" cy="12" r="9" />
-    </svg>
-  ),
-  emerald: (
-    <svg viewBox="0 0 24 24" className="h-6 w-6 fill-current">
-      <rect x="4" y="4" width="16" height="16" rx="2" />
-    </svg>
-  ),
-};
-
-const ORDER: TileColor[] = ['coral', 'sky', 'amber', 'emerald'];
-
 interface OptionTileProps {
   index: number;
   label: string;
@@ -41,8 +7,6 @@ interface OptionTileProps {
 }
 
 export function OptionTile({ index, label, selected, disabled, onSelect }: OptionTileProps) {
-  const color = ORDER[index % ORDER.length];
-
   return (
     <button
       type="button"
@@ -50,19 +14,19 @@ export function OptionTile({ index, label, selected, disabled, onSelect }: Optio
       disabled={disabled}
       aria-pressed={selected}
       className={`
-        group flex min-h-[84px] w-full items-center gap-3 rounded-2xl px-5 py-4 text-left
-        font-display text-lg font-semibold leading-snug
-        shadow-tile transition-all duration-150
-        active:translate-y-1 active:shadow-tile-active
-        disabled:cursor-not-allowed disabled:opacity-40 disabled:active:translate-y-0
-        ${COLOR_MAP[color]}
-        ${selected ? 'ring-4 ring-white ring-offset-2 ring-offset-stage-900' : ''}
+        group flex min-h-[84px] w-full items-center gap-3 rounded-2xl border-2 px-5 py-4 text-left
+        font-display text-lg font-semibold leading-snug shadow-tile transition-all duration-200
+        active:scale-[.985] active:shadow-tile-active disabled:cursor-not-allowed disabled:opacity-50
+        ${selected
+          ? "border-amber bg-white text-stage-950 shadow-[0_0_0_4px_rgba(255,182,39,.18),0_18px_45px_rgba(0,0,0,.25)] animate-[selectionPop_.28s_ease-out]"
+          : "border-white/10 bg-white/[.06] text-white hover:bg-white/[.09]"}
       `}
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-black/15">
-        {SHAPES[color]}
+      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg text-sm font-black transition ${selected ? "bg-stage-950 text-amber" : "bg-white/10 text-white/55"}`}>
+        {String.fromCharCode(65 + index)}
       </span>
-      <span className="text-white/95">{label}</span>
+      <span className={selected ? "text-stage-950" : "text-white/90"}>{label}</span>
+      {selected && <span className="ml-auto text-xs font-black uppercase tracking-[.12em] text-stage-950/60">Đã chọn</span>}
     </button>
   );
 }
