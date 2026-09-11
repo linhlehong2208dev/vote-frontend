@@ -30,7 +30,27 @@ export function GamePresentPage({ game, onGameUpdate, onExit }: { game: GameInfo
 
   const background = useMemo(() => game.background_type === "image" && game.background_value ? { backgroundImage: `url(${game.background_value})`, backgroundSize: "cover", backgroundPosition: "center" } : game.background_type === "color" ? { background: game.background_value || "#17102b" } : { background: game.background_value || "linear-gradient(135deg,#17102b,#38216b)" }, [game]);
 
-  if (game.status === "lobby") return <div className="min-h-screen text-white" style={background}><div className="min-h-screen bg-black/20"><div className="flex items-center justify-between p-6"><button onClick={onExit} className="rounded-xl bg-black/20 px-4 py-2 text-sm font-bold text-white/60">Exit</button><div className="rounded-full bg-black/25 px-5 py-3 text-sm font-black">{count} người chơi</div></div><div className="mx-auto flex min-h-[calc(100vh-100px)] max-w-5xl flex-col items-center justify-center text-center"><p className="text-sm font-extrabold uppercase tracking-[.35em] text-amber">JOIN GAME</p><h1 className="mt-5 font-display text-5xl font-black md:text-8xl">{game.title}</h1><div className="mt-10 rounded-[32px] bg-white p-6 shadow-2xl"><QRCodeSVG value={joinUrl} size={300} level="M" /></div><p className="mt-7 text-lg font-bold text-white/60">Scan QR để tham gia</p><div className="mt-4 rounded-[28px] bg-black/25 px-10 py-6 backdrop-blur"><p className="text-xs font-extrabold uppercase tracking-[.25em] text-white/40">GAME PIN</p><p className="mt-2 font-mono text-6xl font-black tracking-[.25em] text-amber md:text-8xl">{game.pin}</p></div></div></div></div>;
+  if (game.status === "lobby") return <div className="min-h-screen text-white" style={background}><div className="min-h-screen bg-black/20"><div className="flex items-center justify-between p-6"><button onClick={onExit} className="rounded-xl bg-black/20 px-4 py-2 text-sm font-bold text-white/60">Exit</button><div className="rounded-full bg-black/25 px-5 py-3 text-sm font-black">{count} người chơi</div></div><div className="mx-auto flex min-h-[calc(100vh-100px)] max-w-5xl flex-col items-center justify-center text-center"><p className="text-sm font-extrabold uppercase tracking-[.35em] text-amber">JOIN GAME</p><h1 className="mt-5 font-display text-5xl font-black md:text-8xl">{game.title}</h1><div className="mt-10 rounded-[32px] bg-white p-6 shadow-2xl"><QRCodeSVG value={joinUrl} size={300} level="M" /></div><p className="mt-7 text-lg font-bold text-white/60">Scan QR để tham gia</p>
+<div className="mt-8">
+  <button
+    onClick={async () => {
+      if (advancing) return;
+      setAdvancing(true);
+      try {
+        const result = await api.startGame(game.id);
+        onGameUpdate(result.game);
+      } catch (error) {
+        console.error("Không thể bắt đầu trò chơi:", error);
+      } finally {
+        setAdvancing(false);
+      }
+    }}
+    disabled={advancing}
+    className="rounded-2xl bg-amber px-10 py-4 text-xl font-black text-stage-950 shadow-2xl transition hover:scale-[1.02] disabled:cursor-wait disabled:opacity-50"
+  >
+    {advancing ? "Đang bắt đầu…" : "Bắt đầu trò chơi →"}
+  </button>
+</div><div className="mt-4 rounded-[28px] bg-black/25 px-10 py-6 backdrop-blur"><p className="text-xs font-extrabold uppercase tracking-[.25em] text-white/40">GAME PIN</p><p className="mt-2 font-mono text-6xl font-black tracking-[.25em] text-amber md:text-8xl">{game.pin}</p></div></div></div></div>;
 
   if (game.status === "closed") return <div className="grid min-h-screen place-items-center bg-stage-950 px-6 text-center text-white"><div><div className="mx-auto grid h-24 w-24 place-items-center rounded-3xl bg-amber text-5xl text-stage-950">✓</div><p className="mt-7 text-sm font-extrabold uppercase tracking-[.3em] text-amber">GAME COMPLETE</p><h1 className="mt-3 font-display text-5xl font-black md:text-7xl">Game đã kết thúc</h1><button onClick={onExit} className="mt-8 rounded-2xl bg-white px-6 py-3 font-black text-stage-950">Quay lại quản lý</button></div></div>;
 
