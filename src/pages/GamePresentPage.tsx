@@ -27,10 +27,11 @@ export function GamePresentPage({
     game.questions?.find((q) => q.id === game.current_session_id) ??
     game.questions?.[0];
   const joinUrl = `${window.location.origin}/game/${game.pin}`;
+  const serverNow = game.server_now ? new Date(game.server_now).getTime() : now;
   const seconds = current?.ended_at
     ? Math.max(
         0,
-        Math.ceil((new Date(current.ended_at).getTime() - now) / 1000),
+        Math.ceil((new Date(current.ended_at).getTime() - serverNow) / 1000),
       )
     : 0;
   const timeUp = Boolean(

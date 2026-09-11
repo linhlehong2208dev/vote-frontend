@@ -84,6 +84,7 @@ export interface GameInfo {
   current_session_id: string | null;
   created_at: string;
   updated_at?: string;
+  server_now?: string;
   questions?: GameQuestion[];
 }
 
