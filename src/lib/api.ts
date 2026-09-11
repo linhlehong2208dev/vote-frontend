@@ -120,6 +120,23 @@ export interface GameQuestionDashboard {
   history: { userId: string; displayName: string; optionId: string | null; label?: string | null; timestamp: string | null }[];
 }
 
+export interface GamePublicResults {
+  game: { id: string; title: string; pin: string; status: GameStatus };
+  participantCount: number;
+  totalVotes: number;
+  questions: Array<{
+    questionId: string;
+    questionNumber: number;
+    question: string;
+    status: SessionStatus;
+    startedAt: string | null;
+    endedAt: string | null;
+    totalVotes: number;
+    noAnswerCount: number;
+    ranking: { optionId: string; label: string; votes: number }[];
+  }>;
+}
+
 export interface GameDashboard {
   game: GameInfo;
   participantCount: number;
@@ -277,6 +294,9 @@ export const api = {
 
   getGameDashboard: (gameId: string) =>
     request<GameDashboard>(`/api/games/${gameId}/dashboard`),
+
+  getGamePublicResults: (gameId: string) =>
+    request<GamePublicResults>(`/api/games/${gameId}/results`),
 
   getGameLiveStats: (gameId: string) =>
     request<LiveStats & { participantCount: number; currentSessionId?: string }>(
