@@ -253,6 +253,9 @@ export const api = {
   getGameParticipantCount: (gameId: string) =>
     request<{ count: number }>(`/api/games/${gameId}/participants/count`),
 
+  getGameParticipants: (gameId: string) =>
+    request<{ participants: { id: string; displayName: string; joinedAt: string; lastSeenAt: string | null }[] }>(`/api/games/${gameId}/participants`),
+
   enterGameLobby: (gameId: string) =>
     request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}/lobby`, { method: "POST" }),
 

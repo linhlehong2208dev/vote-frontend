@@ -14,6 +14,7 @@ export function GamePresentPage({
   onStart?: () => void | Promise<void>;
 }) {
   const [count, setCount] = useState(0);
+  const [participants, setParticipants] = useState<{ id: string; displayName: string; joinedAt: string; lastSeenAt: string | null }[]>([]);
   const [now, setNow] = useState(Date.now());
   const [advancing, setAdvancing] = useState(false);
   const [starting, setStarting] = useState(false);
@@ -32,7 +33,7 @@ export function GamePresentPage({
   }, []);
 
   useEffect(() => {
-    const load = () => api.getGameParticipantCount(game.id).then(r => setCount(r.count)).catch(() => {});
+    const load = () => api.getGameParticipants(game.id).then(r => { setParticipants(r.participants); setCount(r.participants.length); }).catch(() => {});
     load();
     const t = setInterval(load, 1500);
     return () => clearInterval(t);
@@ -87,7 +88,7 @@ export function GamePresentPage({
         : { background: game.background_value || "linear-gradient(135deg,#17102b,#38216b)" }, [game]);
 
   if (game.status === "lobby") {
-    return <div className="min-h-screen text-white" style={background}><div className="min-h-screen bg-black/20"><div className="flex items-center justify-between p-6"><button onClick={onExit} className="rounded-xl bg-black/20 px-4 py-2 text-sm font-bold text-white/60">Exit</button><div className="rounded-full bg-black/25 px-5 py-3 text-sm font-black">{count} người chơi</div></div><div className="mx-auto flex min-h-[calc(100vh-100px)] max-w-5xl flex-col items-center justify-center px-5 text-center"><p className="text-sm font-extrabold uppercase tracking-[.35em] text-amber">JOIN GAME</p><h1 className="mt-5 font-display text-5xl font-black md:text-8xl">{game.title}</h1><div className="mt-10 rounded-[32px] bg-white p-6 shadow-2xl"><QRCodeSVG value={joinUrl} size={300} level="M" /></div><p className="mt-7 text-lg font-bold text-white/60">Scan QR để tham gia</p><div className="mt-4 rounded-[28px] bg-black/25 px-10 py-6 backdrop-blur"><p className="text-xs font-extrabold uppercase tracking-[.25em] text-white/40">GAME PIN</p><p className="mt-2 font-mono text-6xl font-black tracking-[.25em] text-amber md:text-8xl">{game.pin}</p></div><button onClick={() => void handleStart()} disabled={starting} className="mt-8 rounded-2xl bg-amber px-10 py-4 text-lg font-black text-stage-950 shadow-xl transition hover:scale-[1.02] disabled:opacity-50">{starting ? "Đang bắt đầu…" : "Bắt đầu Game →"}</button></div></div></div>;
+    return <div className="min-h-screen text-white" style={background}><div className="min-h-screen bg-black/20"><div className="flex items-center justify-between p-6"><button onClick={onExit} className="rounded-xl bg-black/20 px-4 py-2 text-sm font-bold text-white/60">Exit</button><div className="rounded-full bg-black/25 px-5 py-3 text-sm font-black">{count} người chơi</div></div><div className="mx-auto flex min-h-[calc(100vh-100px)] max-w-5xl flex-col items-center justify-center px-5 text-center"><p className="text-sm font-extrabold uppercase tracking-[.35em] text-amber">JOIN GAME</p><h1 className="mt-5 font-display text-5xl font-black md:text-8xl">{game.title}</h1><div className="mt-10 rounded-[32px] bg-white p-6 shadow-2xl"><QRCodeSVG value={joinUrl} size={300} level="M" /></div><p className="mt-7 text-lg font-bold text-white/60">Scan QR để tham gia</p><div className="mt-4 rounded-[28px] bg-black/25 px-10 py-6 backdrop-blur"><p className="text-xs font-extrabold uppercase tracking-[.25em] text-white/40">GAME PIN</p><p className="mt-2 font-mono text-6xl font-black tracking-[.25em] text-amber md:text-8xl">{game.pin}</p></div>{participants.length > 0 && <div className="mt-6 w-full max-w-3xl rounded-[28px] bg-black/25 p-5 text-left backdrop-blur"><div className="flex items-center justify-between"><p className="text-xs font-extrabold uppercase tracking-[.2em] text-white/40">NGƯỜI THAM GIA</p><span className="text-sm font-black text-amber">{participants.length}</span></div><div className="mt-4 flex max-h-40 flex-wrap justify-center gap-2 overflow-auto">{participants.map((p, i) => <span key={p.id} className="rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-white/80">{i + 1}. {p.displayName}</span>)}</div></div>}<button onClick={() => void handleStart()} disabled={starting} className="mt-8 rounded-2xl bg-amber px-10 py-4 text-lg font-black text-stage-950 shadow-xl transition hover:scale-[1.02] disabled:opacity-50">{starting ? "Đang bắt đầu…" : "Bắt đầu Game →"}</button></div></div></div>;
   }
 
   if (game.status === "closed") return <FinalRankingDashboard gameId={game.id} gameTitle={game.title} pin={game.pin} onExit={onExit} initial={dashboard} setDashboard={setDashboard} />;
