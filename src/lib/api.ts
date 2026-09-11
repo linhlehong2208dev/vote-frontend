@@ -32,7 +32,6 @@ export interface SessionSummary {
   created_at: string;
 }
 
-
 export interface LiveStats {
   joinedCount: number;
   votedCount: number;
@@ -45,7 +44,6 @@ export interface ResultsInfo {
   noAnswerCount: number;
   totalParticipants: number;
 }
-
 
 export type GameStatus = "draft" | "lobby" | "active" | "closed";
 export type GameBackgroundType = "color" | "gradient" | "image";
@@ -117,7 +115,13 @@ export interface GameQuestionDashboard {
   totalVotes: number;
   noAnswerCount: number;
   ranking: { optionId: string; label: string; votes: number }[];
-  history: { userId: string; displayName: string; optionId: string | null; label?: string | null; timestamp: string | null }[];
+  history: {
+    userId: string;
+    displayName: string;
+    optionId: string | null;
+    label?: string | null;
+    timestamp: string | null;
+  }[];
 }
 
 export interface GamePublicResults {
@@ -143,8 +147,20 @@ export interface GameDashboard {
   totalVotes: number;
   participants: GameParticipant[];
   questions: GameQuestionDashboard[];
-  voteHistory: { questionId: string; questionNumber: number; displayName: string; userId: string; optionId: string | null; label?: string | null; timestamp: string | null }[];
-  participantJoinTimestamps: { userId: string; displayName: string; joinedAt: string }[];
+  voteHistory: {
+    questionId: string;
+    questionNumber: number;
+    displayName: string;
+    userId: string;
+    optionId: string | null;
+    label?: string | null;
+    timestamp: string | null;
+  }[];
+  participantJoinTimestamps: {
+    userId: string;
+    displayName: string;
+    joinedAt: string;
+  }[];
 }
 
 export class ApiError extends Error {
@@ -183,6 +199,22 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return body as T;
 }
 
+function normalizeParticipant(participant: any): GameParticipant {
+  return {
+    id: participant.id,
+    user_id: participant.user_id ?? participant.userId ?? participant.id,
+    display_name:
+      participant.display_name ?? participant.displayName ?? "Người chơi",
+    joined_at:
+      participant.joined_at ?? participant.joinedAt ?? new Date().toISOString(),
+    last_seen_at: participant.last_seen_at ?? participant.lastSeenAt ?? null,
+  };
+}
+
+function normalizeParticipants(participants: any[] = []): GameParticipant[] {
+  return participants.map(normalizeParticipant);
+}
+
 export const api = {
   join: (sessionId: string) =>
     request<{ ok: true; alreadyJoined: boolean }>("/api/join", {
@@ -206,9 +238,14 @@ export const api = {
     request<SessionInfo>(`/api/session/${sessionId}`),
 
   getSessionByCode: (code: string) =>
-    request<{ session: { id: string; question: string; status: SessionStatus; join_code: string } }>(
-      `/api/session/code/${encodeURIComponent(code.trim().toUpperCase())}`,
-    ),
+    request<{
+      session: {
+        id: string;
+        question: string;
+        status: SessionStatus;
+        join_code: string;
+      };
+    }>(`/api/session/code/${encodeURIComponent(code.trim().toUpperCase())}`),
 
   // Tạo câu hỏi mới (admin only). Trả về session vừa tạo (status='pending')
   // kèm id để FE tự build link/QR chia sẻ, không cần gọi lại getSession.
@@ -254,11 +291,15 @@ export const api = {
   getResults: (sessionId: string) =>
     request<ResultsInfo>(`/api/results/${sessionId}`),
   updateGame: (gameId: string, input: CreateGameInput) =>
-    request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}`, { method: "PUT", body: JSON.stringify(input) }),
+    request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}`, {
+      method: "PUT",
+      body: JSON.stringify(input),
+    }),
 
   createGame: (input: CreateGameInput) =>
     request<{ ok: true; game: GameInfo }>("/api/games", {
-      method: "POST", body: JSON.stringify(input),
+      method: "POST",
+      body: JSON.stringify(input),
     }),
 
   listGames: () => request<{ games: GameInfo[] }>("/api/games"),
@@ -267,45 +308,70 @@ export const api = {
     request<{ game: GameInfo }>(`/api/games/${gameId}`),
 
   getGameByPin: (pin: string) =>
-    request<{ game: GameInfo }>(`/api/games/pin/${encodeURIComponent(pin.trim().toUpperCase())}`),
+    request<{ game: GameInfo }>(
+      `/api/games/pin/${encodeURIComponent(pin.trim().toUpperCase())}`,
+    ),
 
   joinGame: (gameId: string, displayName: string) =>
     request<{ ok: true }>(`/api/games/${gameId}/join`, {
-      method: "POST", body: JSON.stringify({ displayName }),
+      method: "POST",
+      body: JSON.stringify({ displayName }),
     }),
 
   getGameParticipantCount: (gameId: string) =>
     request<{ count: number }>(`/api/games/${gameId}/participants/count`),
 
-  getGameParticipants: (gameId: string) =>
-    request<{ participants: GameParticipant[] }>(`/api/games/${gameId}/participants`),
+  getGameParticipants: async (gameId: string) => {
+    const result = await request<{ participants: any[] }>(
+      `/api/games/${gameId}/participants`,
+    );
+    return { participants: normalizeParticipants(result.participants) };
+  },
 
   enterGameLobby: (gameId: string) =>
-    request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}/lobby`, { method: "POST" }),
+    request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}/lobby`, {
+      method: "POST",
+    }),
 
   startGame: (gameId: string) =>
-    request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}/start`, { method: "POST" }),
+    request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}/start`, {
+      method: "POST",
+    }),
 
   nextGameQuestion: (gameId: string) =>
-    request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}/next`, { method: "POST" }),
+    request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}/next`, {
+      method: "POST",
+    }),
 
   closeGame: (gameId: string) =>
-    request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}/close`, { method: "POST" }),
+    request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}/close`, {
+      method: "POST",
+    }),
 
-  getGameDashboard: (gameId: string) =>
-    request<GameDashboard>(`/api/games/${gameId}/dashboard`),
+  getGameDashboard: async (gameId: string) => {
+    const result = await request<any>(`/api/games/${gameId}/dashboard`);
+    return {
+      ...result,
+      participants: normalizeParticipants(result.participants ?? []),
+    } as GameDashboard;
+  },
 
   getGamePublicResults: (gameId: string) =>
     request<GamePublicResults>(`/api/games/${gameId}/results`),
 
   getGameLiveStats: (gameId: string) =>
-    request<LiveStats & { participantCount: number; currentSessionId?: string }>(
-      `/api/games/${gameId}/stats`,
-    ),
+    request<
+      LiveStats & { participantCount: number; currentSessionId?: string }
+    >(`/api/games/${gameId}/stats`),
 
   getQuestionVoters: (gameId: string, questionId: string, optionId?: string) =>
-    request<{ voters: { userId: string; displayName: string; optionId: string | null }[] }>(
+    request<{
+      voters: {
+        userId: string;
+        displayName: string;
+        optionId: string | null;
+      }[];
+    }>(
       `/api/games/${gameId}/questions/${questionId}/voters${optionId ? `?optionId=${encodeURIComponent(optionId)}` : ""}`,
     ),
-
 };
