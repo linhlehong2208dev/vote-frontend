@@ -6,6 +6,8 @@ import { OptionTile } from "../components/OptionTile";
 import { ResultsBoard } from "../components/ResultsBoard";
 import { useAuth } from "../hooks/useAuth";
 
+const CLOSING_GRACE_MS = 2000;
+
 export function VotePage({ sessionId }: { sessionId: string }) {
   const { signOut } = useAuth();
   const { session, error, displaySeconds } = useSessionState(sessionId);
@@ -14,6 +16,7 @@ export function VotePage({ sessionId }: { sessionId: string }) {
   const [joinedCount, setJoinedCount] = useState<number | null>(null);
   const [results, setResults] = useState<ResultsInfo | null>(null);
   const [joinError, setJoinError] = useState<string | null>(null);
+  const [showClosingState, setShowClosingState] = useState(false);
 
   // Chỉ được bình chọn khi session đang active VÀ vẫn còn thời gian.
   //
@@ -31,6 +34,20 @@ export function VotePage({ sessionId }: { sessionId: string }) {
     if (!session || session.status === "closed") return;
     api.join(sessionId).catch((err) => setJoinError(err.message));
   }, [sessionId, session?.status]);
+
+  useEffect(() => {
+    if (session?.status !== "active" || displaySeconds !== 0) {
+      setShowClosingState(false);
+      return;
+    }
+
+    setShowClosingState(true);
+    const id = window.setTimeout(() => {
+      setShowClosingState(false);
+    }, CLOSING_GRACE_MS);
+
+    return () => window.clearTimeout(id);
+  }, [displaySeconds, session?.status]);
 
   // Đếm số người đã JOIN (không phải số người đã vote). Polling nhẹ 1.5s giúp
   // màn hình chờ cập nhật ngay cả khi Realtime chưa kịp kết nối.
@@ -157,11 +174,20 @@ export function VotePage({ sessionId }: { sessionId: string }) {
               </p>
             )}
 
-            {session.status === "active" && displaySeconds === 0 && (
-              <p className="mt-4 text-center text-sm text-coral">
-                Đã hết thời gian bình chọn.
-              </p>
-            )}
+            {session.status === "active" &&
+              displaySeconds === 0 &&
+              (showClosingState ? (
+                <div className="mt-4 flex flex-col items-center gap-3 rounded-2xl border border-amber/20 bg-amber/10 px-4 py-3 text-center text-sm text-amber">
+                  <div className="h-9 w-9 animate-spin rounded-full border-2 border-amber/30 border-t-amber" />
+                  <p className="font-semibold">
+                    Đang chốt kết quả, vui lòng chờ…
+                  </p>
+                </div>
+              ) : (
+                <p className="mt-4 text-center text-sm text-coral">
+                  Đã hết thời gian bình chọn.
+                </p>
+              ))}
           </>
         )}
 

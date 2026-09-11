@@ -25,6 +25,7 @@ export function AdminPage({ sessionId }: { sessionId: string }) {
   const [actionError, setActionError] = useState<string | null>(null);
   const [stats, setStats] = useState<LiveStats>(EMPTY_STATS);
   const [results, setResults] = useState<ResultsInfo | null>(null);
+  const [showClosingState, setShowClosingState] = useState(false);
 
   async function refreshStats() {
     try {
@@ -91,11 +92,28 @@ export function AdminPage({ sessionId }: { sessionId: string }) {
 
   useEffect(() => {
     if (session?.status === "closed") {
-      api.getResults(sessionId).then(setResults).catch(() => {});
+      api
+        .getResults(sessionId)
+        .then(setResults)
+        .catch(() => {});
     } else {
       setResults(null);
     }
   }, [session?.status, sessionId]);
+
+  useEffect(() => {
+    if (session?.status !== "active" || displaySeconds !== 0) {
+      setShowClosingState(false);
+      return;
+    }
+
+    setShowClosingState(true);
+    const id = window.setTimeout(() => {
+      setShowClosingState(false);
+    }, 2000);
+
+    return () => window.clearTimeout(id);
+  }, [displaySeconds, session?.status]);
 
   async function runAction(fn: () => Promise<unknown>) {
     setBusy(true);
@@ -117,10 +135,7 @@ export function AdminPage({ sessionId }: { sessionId: string }) {
 
   if (error) {
     return (
-      <CenteredMessage
-        title="Không tải được phiên bình chọn"
-        detail={error}
-      />
+      <CenteredMessage title="Không tải được phiên bình chọn" detail={error} />
     );
   }
   if (!session) {
@@ -168,6 +183,15 @@ export function AdminPage({ sessionId }: { sessionId: string }) {
             />
           </div>
         )}
+
+        {session.status === "active" &&
+          displaySeconds === 0 &&
+          showClosingState && (
+            <div className="mt-5 rounded-2xl border border-amber/20 bg-amber/10 px-4 py-3 text-center text-sm text-amber">
+              <div className="mx-auto mb-2 h-9 w-9 animate-spin rounded-full border-2 border-amber/30 border-t-amber" />
+              Đang chốt kết quả, vui lòng chờ…
+            </div>
+          )}
 
         {session.status !== "closed" && (
           <LiveDashboard
