@@ -56,12 +56,13 @@ export interface GameQuestionDashboard {
   totalVotes: number;
   noAnswerCount: number;
   ranking: { optionId: string; label: string; votes: number }[];
-  history: { questionId: string; questionNumber: number; question: string; optionId: string | null; optionLabel: string; timestamp: string }[];
+  history: { questionId: string; questionNumber: number; question: string; userId: string; displayName: string; optionId: string | null; optionLabel: string; timestamp: string }[];
 }
 
 export interface GameDashboard {
   game: { id: string; title: string; pin: string; status: GameStatus; createdAt: string; updatedAt: string };
   participantCount: number;
+  participants: { id: string; userId: string; displayName: string; joinedAt: string; lastSeenAt: string | null }[];
   totalVotes: number;
   questions: GameQuestionDashboard[];
   voteHistory: GameQuestionDashboard["history"];
@@ -277,7 +278,7 @@ export const api = {
     request<GameDashboard>(`/api/games/${gameId}/dashboard`),
 
   getQuestionVoters: (gameId: string, questionId: string, optionId?: string) =>
-    request<{ voters: { userId: string; displayName: string; optionId: string | null }[] }>(
+    request<{ voters: { userId: string; displayName: string; optionId: string | null; timestamp: string }[] }>(
       `/api/games/${gameId}/questions/${questionId}/voters${optionId ? `?optionId=${encodeURIComponent(optionId)}` : ""}`,
     ),
 
