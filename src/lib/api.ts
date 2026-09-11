@@ -67,6 +67,14 @@ export interface GameQuestion {
   options?: OptionInfo[];
 }
 
+export interface GameParticipant {
+  id: string;
+  user_id: string;
+  display_name: string;
+  joined_at: string;
+  last_seen_at?: string | null;
+}
+
 export interface GameInfo {
   id: string;
   title: string;
@@ -225,6 +233,9 @@ export const api = {
 
   getGameParticipantCount: (gameId: string) =>
     request<{ count: number }>(`/api/games/${gameId}/participants/count`),
+
+  getGameParticipants: (gameId: string) =>
+    request<{ participants: GameParticipant[] }>(`/api/games/${gameId}/participants`),
 
   enterGameLobby: (gameId: string) =>
     request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}/lobby`, { method: "POST" }),
