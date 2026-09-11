@@ -19,11 +19,20 @@ export function GameLobbyPage({ game, isAdmin, onGameUpdate, onStart, onBack }: 
 
   const loadParticipants = useCallback(async () => {
     try {
-      const result = await api.getGameParticipants(game.id);
-      setParticipants(result.participants);
-      setCount(result.participants.length);
+      if (isAdmin) {
+        // Admin can see the participant list and count.
+        const result = await api.getGameParticipants(game.id);
+        setParticipants(result.participants);
+        setCount(result.participants.length);
+      } else {
+        // Players must only receive the public participant count.
+        // The participant-list endpoint is admin-only.
+        const result = await api.getGameParticipantCount(game.id);
+        setParticipants([]);
+        setCount(result.count);
+      }
     } catch { /* transient */ }
-  }, [game.id]);
+  }, [game.id, isAdmin]);
 
   const loadCount = loadParticipants;
 
