@@ -80,7 +80,19 @@ export default function App() {
   if (gamePin) {
     if (gameLoading) return <FullScreenMessage text={`Đang mở Game ${gamePin}…`} />;
     if (gameError || !game) return <FullScreenMessage text={gameError || "Không tìm thấy Game."} />;
-    if (isAdmin && path.endsWith("/present")) return <GamePresentPage game={game} onGameUpdate={setGame} onExit={()=>navigate(`/admin/games/${game.id}`)} />;
+    if (isAdmin && path.endsWith("/present")) {
+      return (
+        <GamePresentPage
+          game={game}
+          onGameUpdate={setGame}
+          onExit={() => navigate(`/admin/games/${game.id}`)}
+          onStart={async () => {
+            const updated = await api.startGame(game.id);
+            setGame(updated.game);
+          }}
+        />
+      );
+    }
     if (game.status === "lobby" || game.status === "draft") return <GameLobbyPage game={game} isAdmin={isAdmin} onGameUpdate={setGame} onStart={isAdmin ? async()=>{ const updated=await api.startGame(game.id); setGame(updated.game); navigate(`/game/${game.pin}/present`); } : ()=>{}} onBack={()=>navigate(isAdmin?`/admin/games/${game.id}`:"/")} />;
     if (game.status === "active") return <GamePlayerActive game={game} onUpdate={setGame} />;
     return <GameClosedPage game={game} />;
@@ -90,10 +102,26 @@ export default function App() {
   if (joinCode && !sessionId) return joinResolving ? <FullScreenMessage text={`Đang mở phòng ${joinCode}…`} /> : <FullScreenMessage text={joinError ?? "Không tìm thấy phòng."} />;
 
   if (isAdmin && !sessionId) {
-    if (path === "/admin/games/new" || adminView === "create") return <GameBuilderPage onBack={()=>{setAdminView("list");navigate("/admin/games")}} onCreated={id=>{setAdminView("list");navigate(`/admin/games/${id}`)}} />;
+    const editMatch = path.match(/^\/admin\/games\/([^/]+)\/edit$/i);
+    if (editMatch) {
+      const id = editMatch[1];
+      return (
+        <GameBuilderPage
+          gameId={id}
+          onBack={() => navigate(`/admin/games/${id}`)}
+          onCreated={(savedId) => navigate(`/admin/games/${savedId}`)}
+        />
+      );
+    }
+
+    if (path === "/admin/games/new" || adminView === "create") {
+      return <GameBuilderPage onBack={()=>{setAdminView("list");navigate("/admin/games")}} onCreated={id=>{setAdminView("list");navigate(`/admin/games/${id}`)}} />;
+    }
+
     if (path.startsWith("/admin/games/") && path !== "/admin/games/new") {
-      const id=path.split("/").pop()??"";
-      if (path.endsWith("/present")) return <FullScreenMessage text="Đang mở Presentation…" />;
+      const match = path.match(/^\/admin\/games\/([^/]+)$/i);
+      const id = match?.[1] ?? "";
+      if (!id) return <FullScreenMessage text="Không tìm thấy Game." />;
       return <GameManagementPage gameId={id} onLobby={async()=>{ const g=await api.enterGameLobby(id); setGame(g.game); navigate(`/game/${g.game.pin}/present`); }} onEdit={()=>navigate(`/admin/games/${id}/edit`)} onBack={()=>navigate("/admin/games")} />;
     }
     return <AdminHomePage onCreate={()=>{setAdminView("create");navigate("/admin/games/new")}} onOpen={id=>navigate(`/admin/games/${id}`)} />;

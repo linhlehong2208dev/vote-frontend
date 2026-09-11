@@ -1,11 +1,15 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { api, ApiError, type CreateGameInput, type GameBackgroundType } from "../lib/api";
 
 interface DraftQuestion { id: number; question: string; options: string[]; durationSeconds: number; imageUrl: string; backgroundType: GameBackgroundType; backgroundValue: string; }
 
 const defaultQuestion = (id: number): DraftQuestion => ({ id, question: "", options: ["", ""], durationSeconds: 20, imageUrl: "", backgroundType: "gradient", backgroundValue: "" });
 
-export function GameBuilderPage({ onBack, onCreated }: { onBack: () => void; onCreated: (id: string) => void }) {
+export function GameBuilderPage({ onBack, onCreated, gameId }: {
+  onBack: () => void;
+  onCreated: (id: string) => void;
+  gameId?: string;
+}) {
   const [title, setTitle] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
   const [backgroundType, setBackgroundType] = useState<GameBackgroundType>("gradient");
@@ -14,6 +18,36 @@ export function GameBuilderPage({ onBack, onCreated }: { onBack: () => void; onC
   const [activeQuestion, setActiveQuestion] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadingGame, setLoadingGame] = useState(Boolean(gameId));
+
+  useEffect(() => {
+    if (!gameId) return;
+    let cancelled = false;
+    setLoadingGame(true);
+    api.getGame(gameId).then(({ game }) => {
+      if (cancelled) return;
+      setTitle(game.title);
+      setCoverUrl(game.cover_url ?? "");
+      setBackgroundType(game.background_type);
+      setBackgroundValue(game.background_value ?? "");
+      const loaded = (game.questions ?? []).map((q, index) => ({
+        id: index + 1,
+        question: q.question,
+        options: (q.options ?? []).map((o) => o.label),
+        durationSeconds: q.duration_seconds ?? 20,
+        imageUrl: q.image_url ?? "",
+        backgroundType: q.background_type ?? "gradient",
+        backgroundValue: q.background_value ?? "",
+      }));
+      setQuestions(loaded.length ? loaded : [defaultQuestion(1)]);
+      setActiveQuestion(0);
+    }).catch((err) => {
+      if (!cancelled) setError(err instanceof ApiError ? err.message : "Không thể tải Game.");
+    }).finally(() => {
+      if (!cancelled) setLoadingGame(false);
+    });
+    return () => { cancelled = true; };
+  }, [gameId]);
 
   const current = questions[activeQuestion];
   const canCreate = title.trim().length > 0 && questions.every((q) => q.question.trim() && q.options.filter(Boolean).length >= 2);
@@ -34,9 +68,18 @@ export function GameBuilderPage({ onBack, onCreated }: { onBack: () => void; onC
       title: title.trim(), coverUrl: coverUrl.trim() || null, backgroundType, backgroundValue: backgroundValue.trim() || null,
       questions: questions.map((q) => ({ question: q.question.trim(), options: q.options.map((x) => x.trim()).filter(Boolean), durationSeconds: q.durationSeconds, imageUrl: q.imageUrl.trim() || null, backgroundType: q.backgroundType, backgroundValue: q.backgroundValue.trim() || null })),
     };
-    try { const result = await api.createGame(input); onCreated(result.game.id); }
-    catch (err) { setError(err instanceof ApiError ? err.message : "Không thể tạo Game."); }
+    try {
+      const result = gameId
+        ? await api.updateGame(gameId, input)
+        : await api.createGame(input);
+      onCreated(result.game.id);
+    }
+    catch (err) { setError(err instanceof ApiError ? err.message : "Không thể lưu Game."); }
     finally { setBusy(false); }
+  }
+
+  if (loadingGame || !current) {
+    return <div className="grid min-h-screen place-items-center bg-stage-950 text-white"><p className="text-white/60">Đang tải Game…</p></div>;
   }
 
   return <div className="min-h-screen bg-stage-950 text-white">
@@ -44,7 +87,7 @@ export function GameBuilderPage({ onBack, onCreated }: { onBack: () => void; onC
       <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-4 px-4 py-3 md:px-6">
         <button onClick={onBack} className="rounded-xl px-3 py-2 text-sm font-bold text-white/55 hover:bg-white/5 hover:text-white">← My Games</button>
         <div className="hidden text-center md:block"><p className="text-[10px] font-extrabold uppercase tracking-[0.25em] text-amber">GAME BUILDER</p><p className="font-display text-sm font-bold text-white/70">{title || "Untitled Game"}</p></div>
-        <button disabled={busy} onClick={submit} className="rounded-xl bg-amber px-4 py-2.5 text-sm font-extrabold text-stage-950 shadow-tile disabled:opacity-50">{busy ? "Đang tạo…" : "Tạo Game"}</button>
+        <button disabled={busy} onClick={submit} className="rounded-xl bg-amber px-4 py-2.5 text-sm font-extrabold text-stage-950 shadow-tile disabled:opacity-50">{busy ? "Đang lưu…" : gameId ? "Lưu thay đổi" : "Tạo Game"}</button>
       </div>
     </header>
 

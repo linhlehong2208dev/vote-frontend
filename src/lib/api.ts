@@ -210,6 +210,11 @@ export const api = {
       method: "POST", body: JSON.stringify(input),
     }),
 
+  updateGame: (gameId: string, input: CreateGameInput) =>
+    request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}`, {
+      method: "PUT", body: JSON.stringify(input),
+    }),
+
   listGames: () => request<{ games: GameInfo[] }>("/api/games"),
 
   getGame: (gameId: string) =>
