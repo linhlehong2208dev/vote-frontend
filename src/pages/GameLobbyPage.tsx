@@ -31,6 +31,9 @@ export function GameLobbyPage({
   const [name, setName] = useState(getPlayer(game.id)?.displayName ?? "");
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState("");
+  // Once the player has joined this lobby, keep that state locally.
+  // Do not re-derive it on every render/poll cycle.
+  const [joined, setJoined] = useState(() => Boolean(getPlayer(game.id)));
   const joinUrl = `${window.location.origin}/game/${encodeURIComponent(game.pin)}`;
 
   const loadCount = useCallback(async () => {
@@ -48,16 +51,21 @@ export function GameLobbyPage({
   }, [loadCount]);
 
   useEffect(() => {
+    // Poll only for the lobby status transition. The previous implementation
+    // pushed a new Game object into App every second, which made the player
+    // lobby look like it was refreshing/re-entering the game.
     const timer = window.setInterval(async () => {
       try {
         const fresh = (await api.getGame(game.id)).game;
-        onGameUpdate(fresh);
+        if (fresh.status !== game.status || fresh.current_session_id !== game.current_session_id) {
+          onGameUpdate(fresh);
+        }
       } catch {
         /* transient */
       }
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [game.id, onGameUpdate]);
+  }, [game.id, game.status, game.current_session_id, onGameUpdate]);
 
   useEffect(() => {
     if (!isAdmin && game.status === "active") onStart?.();
@@ -73,6 +81,7 @@ export function GameLobbyPage({
         `${PLAYER_KEY}:${game.id}`,
         JSON.stringify({ displayName: name.trim().slice(0, 80) }),
       );
+      setJoined(true);
       await loadCount();
     } catch (err: any) {
       setError(err?.message ?? "Không thể tham gia Game.");
@@ -81,7 +90,7 @@ export function GameLobbyPage({
     }
   };
 
-  const alreadyJoined = Boolean(getPlayer(game.id));
+  const alreadyJoined = joined;
   const qrSize = 280;
 
   return (
