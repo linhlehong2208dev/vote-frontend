@@ -30,6 +30,7 @@ export function GameLobbyPage({
   const [count, setCount] = useState(0);
   const [name, setName] = useState(getPlayer(game.id)?.displayName ?? "");
   const [joining, setJoining] = useState(false);
+  const [starting, setStarting] = useState(false);
   const [error, setError] = useState("");
   // Once the player has joined this lobby, keep that state locally.
   // Do not re-derive it on every render/poll cycle.
@@ -57,7 +58,10 @@ export function GameLobbyPage({
     const timer = window.setInterval(async () => {
       try {
         const fresh = (await api.getGame(game.id)).game;
-        if (fresh.status !== game.status || fresh.current_session_id !== game.current_session_id) {
+        if (
+          fresh.status !== game.status ||
+          fresh.current_session_id !== game.current_session_id
+        ) {
           onGameUpdate(fresh);
         }
       } catch {
@@ -91,7 +95,24 @@ export function GameLobbyPage({
   };
 
   const alreadyJoined = joined;
+  const participantsConfirmed = count > 0;
   const qrSize = 280;
+
+  const handleStart = async () => {
+    if (
+      !onStart ||
+      !participantsConfirmed ||
+      starting ||
+      game.status !== "lobby"
+    )
+      return;
+    setStarting(true);
+    try {
+      await onStart();
+    } finally {
+      setStarting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen overflow-hidden bg-stage-950 text-white">
@@ -197,6 +218,16 @@ export function GameLobbyPage({
                     ? "Mở màn hình này trên TV / máy chiếu để hiển thị Game PIN và QR."
                     : "Hãy chờ Host bắt đầu. Bạn không cần quét QR lại."}
                 </p>
+                {!isAdmin && (
+                  <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald/20 bg-emerald/10 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[.18em] text-emerald shadow-[0_0_20px_rgba(16,185,129,0.18)]">
+                    <span className="flex gap-1">
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald [animation-delay:0ms]" />
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald [animation-delay:200ms]" />
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald [animation-delay:400ms]" />
+                    </span>
+                    Đang chờ Host
+                  </div>
+                )}
               </div>
               {isAdmin && (
                 <div className="mt-6 flex justify-center rounded-3xl bg-white p-4">
@@ -217,13 +248,37 @@ export function GameLobbyPage({
                 </div>
               )}
               {isAdmin && (
-                <button
-                  onClick={onStart}
-                  disabled={game.status !== "lobby"}
-                  className="mt-5 w-full rounded-2xl bg-amber py-4 font-display font-black text-stage-950 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  Bắt đầu Game →
-                </button>
+                <>
+                  <div
+                    className={`mt-5 rounded-2xl border p-3 text-center transition-all ${participantsConfirmed ? "border-emerald/30 bg-emerald/10 shadow-[0_0_24px_rgba(16,185,129,0.22)]" : "border-white/10 bg-black/20"}`}
+                  >
+                    <p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-white/35">
+                      TÌNH TRẠNG THAM GIA
+                    </p>
+                    <p
+                      className={`mt-1 text-sm font-bold ${participantsConfirmed ? "text-emerald" : "text-white/70"}`}
+                    >
+                      {participantsConfirmed
+                        ? `Sẵn sàng bắt đầu • đã xác nhận ${count} người chơi.`
+                        : "Đang chờ người chơi tham gia..."}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => void handleStart()}
+                    disabled={
+                      game.status !== "lobby" ||
+                      !participantsConfirmed ||
+                      starting
+                    }
+                    className="mt-5 w-full rounded-2xl bg-amber py-4 font-display font-black text-stage-950 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {starting
+                      ? "Đang bắt đầu…"
+                      : participantsConfirmed
+                        ? "Bắt đầu Game →"
+                        : "Đang chờ người chơi…"}
+                  </button>
+                </>
               )}
             </>
           )}
