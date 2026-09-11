@@ -107,6 +107,29 @@ export interface CreateGameInput {
   questions: CreateGameQuestionInput[];
 }
 
+export interface GameQuestionDashboard {
+  id: string;
+  number: number;
+  question: string;
+  status: SessionStatus;
+  startedAt: string | null;
+  endedAt: string | null;
+  totalVotes: number;
+  noAnswerCount: number;
+  ranking: { optionId: string; label: string; votes: number }[];
+  history: { userId: string; displayName: string; optionId: string | null; label?: string | null; timestamp: string | null }[];
+}
+
+export interface GameDashboard {
+  game: GameInfo;
+  participantCount: number;
+  totalVotes: number;
+  participants: GameParticipant[];
+  questions: GameQuestionDashboard[];
+  voteHistory: { questionId: string; questionNumber: number; displayName: string; userId: string; optionId: string | null; label?: string | null; timestamp: string | null }[];
+  participantJoinTimestamps: { userId: string; displayName: string; joinedAt: string }[];
+}
+
 export class ApiError extends Error {
   code: string;
   status: number;
@@ -213,6 +236,9 @@ export const api = {
 
   getResults: (sessionId: string) =>
     request<ResultsInfo>(`/api/results/${sessionId}`),
+  updateGame: (gameId: string, input: CreateGameInput) =>
+    request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}`, { method: "PUT", body: JSON.stringify(input) }),
+
   createGame: (input: CreateGameInput) =>
     request<{ ok: true; game: GameInfo }>("/api/games", {
       method: "POST", body: JSON.stringify(input),
@@ -248,6 +274,9 @@ export const api = {
 
   closeGame: (gameId: string) =>
     request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}/close`, { method: "POST" }),
+
+  getGameDashboard: (gameId: string) =>
+    request<GameDashboard>(`/api/games/${gameId}/dashboard`),
 
   getGameLiveStats: (gameId: string) =>
     request<LiveStats & { participantCount: number; currentSessionId?: string }>(

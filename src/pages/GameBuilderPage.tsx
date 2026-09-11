@@ -1,11 +1,11 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { api, ApiError, type CreateGameInput, type GameBackgroundType } from "../lib/api";
 
 interface DraftQuestion { id: number; question: string; options: string[]; durationSeconds: number; imageUrl: string; backgroundType: GameBackgroundType; backgroundValue: string; }
 
 const defaultQuestion = (id: number): DraftQuestion => ({ id, question: "", options: ["", ""], durationSeconds: 20, imageUrl: "", backgroundType: "gradient", backgroundValue: "" });
 
-export function GameBuilderPage({ onBack, onCreated }: { onBack: () => void; onCreated: (id: string) => void }) {
+export function GameBuilderPage({ gameId, onBack, onCreated }: { gameId?: string; onBack: () => void; onCreated: (id: string) => void }) {
   const [title, setTitle] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
   const [backgroundType, setBackgroundType] = useState<GameBackgroundType>("gradient");
@@ -14,6 +14,27 @@ export function GameBuilderPage({ onBack, onCreated }: { onBack: () => void; onC
   const [activeQuestion, setActiveQuestion] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!gameId) return;
+    void api.getGame(gameId).then(({ game }) => {
+      setTitle(game.title);
+      setCoverUrl(game.cover_url ?? "");
+      setBackgroundType(game.background_type);
+      setBackgroundValue(game.background_value ?? "");
+      if (game.questions?.length) {
+        setQuestions(game.questions.map((q, i) => ({
+          id: i + 1,
+          question: q.question,
+          options: (q.options ?? []).map(o => o.label),
+          durationSeconds: q.duration_seconds ?? 20,
+          imageUrl: q.image_url ?? "",
+          backgroundType: q.background_type ?? "gradient",
+          backgroundValue: q.background_value ?? "",
+        })));
+      }
+    }).catch(() => setError("Không thể tải Game để chỉnh sửa."));
+  }, [gameId]);
 
   const current = questions[activeQuestion];
   const canCreate = title.trim().length > 0 && questions.every((q) => q.question.trim() && q.options.filter(Boolean).length >= 2);
@@ -34,7 +55,10 @@ export function GameBuilderPage({ onBack, onCreated }: { onBack: () => void; onC
       title: title.trim(), coverUrl: coverUrl.trim() || null, backgroundType, backgroundValue: backgroundValue.trim() || null,
       questions: questions.map((q) => ({ question: q.question.trim(), options: q.options.map((x) => x.trim()).filter(Boolean), durationSeconds: q.durationSeconds, imageUrl: q.imageUrl.trim() || null, backgroundType: q.backgroundType, backgroundValue: q.backgroundValue.trim() || null })),
     };
-    try { const result = await api.createGame(input); onCreated(result.game.id); }
+    try {
+      const result = gameId ? await api.updateGame(gameId, input) : await api.createGame(input);
+      onCreated(result.game.id);
+    }
     catch (err) { setError(err instanceof ApiError ? err.message : "Không thể tạo Game."); }
     finally { setBusy(false); }
   }
@@ -44,7 +68,7 @@ export function GameBuilderPage({ onBack, onCreated }: { onBack: () => void; onC
       <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-4 px-4 py-3 md:px-6">
         <button onClick={onBack} className="rounded-xl px-3 py-2 text-sm font-bold text-white/55 hover:bg-white/5 hover:text-white">← My Games</button>
         <div className="hidden text-center md:block"><p className="text-[10px] font-extrabold uppercase tracking-[0.25em] text-amber">GAME BUILDER</p><p className="font-display text-sm font-bold text-white/70">{title || "Untitled Game"}</p></div>
-        <button disabled={busy} onClick={submit} className="rounded-xl bg-amber px-4 py-2.5 text-sm font-extrabold text-stage-950 shadow-tile disabled:opacity-50">{busy ? "Đang tạo…" : "Tạo Game"}</button>
+        <button disabled={busy} onClick={submit} className="rounded-xl bg-amber px-4 py-2.5 text-sm font-extrabold text-stage-950 shadow-tile disabled:opacity-50">{busy ? (gameId ? "Đang lưu…" : "Đang tạo…") : (gameId ? "Lưu thay đổi" : "Tạo Game")}</button>
       </div>
     </header>
 

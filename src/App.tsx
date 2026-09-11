@@ -114,8 +114,10 @@ export default function App() {
   if (isAdmin && !sessionId) {
     if (path === "/admin/games/new" || adminView === "create") return <GameBuilderPage onBack={()=>{setAdminView("list");navigate("/admin/games")}} onCreated={id=>{setAdminView("list");navigate(`/admin/games/${id}`)}} />;
     if (path.startsWith("/admin/games/") && path !== "/admin/games/new") {
-      const id=path.split("/").pop()??"";
+      const parts = path.split("/").filter(Boolean);
+      const id = parts[2] ?? "";
       if (path.endsWith("/present")) return <FullScreenMessage text="Đang mở Presentation…" />;
+      if (path.endsWith("/edit")) return <GameBuilderPage gameId={id} onBack={()=>navigate(`/admin/games/${id}`)} onCreated={()=>navigate(`/admin/games/${id}`)} />;
       return <GameManagementPage gameId={id} onLobby={async()=>{ const g=await api.enterGameLobby(id); setGame(g.game); navigate(`/game/${g.game.pin}/present`); }} onEdit={()=>navigate(`/admin/games/${id}/edit`)} onBack={()=>navigate("/admin/games")} />;
     }
     return <AdminHomePage onCreate={()=>{setAdminView("create");navigate("/admin/games/new")}} onOpen={id=>navigate(`/admin/games/${id}`)} />;
