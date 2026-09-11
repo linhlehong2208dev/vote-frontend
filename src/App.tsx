@@ -22,6 +22,7 @@ export default function App() {
   const { session, profile, loading } = useAuth();
   const [manualSessionId, setManualSessionId] = useState("");
   const [manualJoinCode, setManualJoinCode] = useState<string | null>(null);
+  const [manualGamePin, setManualGamePin] = useState<string | null>(null);
   const [resolvedJoinSessionId, setResolvedJoinSessionId] = useState<string | null>(null);
   const [joinResolving, setJoinResolving] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
@@ -32,7 +33,7 @@ export default function App() {
   const [, setRouteVersion] = useState(0);
 
   const path = getPath();
-  const gamePin = getGamePinFromUrl();
+  const gamePin = getGamePinFromUrl() ?? manualGamePin;
   const urlSessionId = getSessionIdFromUrl();
   const joinCode = getJoinCodeFromUrl() ?? manualJoinCode;
   const isAdmin = isAdminEmail(profile?.email);
@@ -53,11 +54,32 @@ export default function App() {
   }, [loading, session]);
 
   useEffect(() => {
-    if (!session || !joinCode || urlSessionId || manualSessionId) return;
+    if (!session || !joinCode || urlSessionId || manualSessionId || manualGamePin) return;
     let cancelled=false; setJoinResolving(true); setJoinError(null);
-    api.getSessionByCode(joinCode).then(({session:found})=>{ if(!cancelled) setResolvedJoinSessionId(found.id); }).catch(err=>{if(!cancelled)setJoinError(err.message??"Mã câu hỏi không hợp lệ.")}).finally(()=>{if(!cancelled)setJoinResolving(false)});
+
+    // A V2 Game PIN must resolve through /api/games/pin/:pin.
+    // Only fall back to the legacy V1 session-code endpoint when no Game exists.
+    api.getGameByPin(joinCode)
+      .then(({game: found}) => {
+        if (!cancelled) {
+          setManualGamePin(found.pin);
+          setManualJoinCode(null);
+        }
+      })
+      .catch(() => {
+        // Backward compatibility for old V1 join codes.
+        api.getSessionByCode(joinCode)
+          .then(({session:found})=>{ if(!cancelled) setResolvedJoinSessionId(found.id); })
+          .catch(err=>{if(!cancelled)setJoinError(err.message??"Mã phòng không hợp lệ.")})
+          .finally(()=>{if(!cancelled)setJoinResolving(false)});
+      })
+      .finally(()=>{
+        // When a V2 Game was found, the game effect will take over.
+        if (!cancelled && !manualGamePin) setJoinResolving(false);
+      });
+
     return ()=>{cancelled=true};
-  }, [session, joinCode, urlSessionId, manualSessionId]);
+  }, [session, joinCode, urlSessionId, manualSessionId, manualGamePin]);
 
   useEffect(() => {
     if (!session || !gamePin) return;
@@ -80,19 +102,7 @@ export default function App() {
   if (gamePin) {
     if (gameLoading) return <FullScreenMessage text={`Đang mở Game ${gamePin}…`} />;
     if (gameError || !game) return <FullScreenMessage text={gameError || "Không tìm thấy Game."} />;
-    if (isAdmin && path.endsWith("/present")) {
-      return (
-        <GamePresentPage
-          game={game}
-          onGameUpdate={setGame}
-          onExit={() => navigate(`/admin/games/${game.id}`)}
-          onStart={async () => {
-            const updated = await api.startGame(game.id);
-            setGame(updated.game);
-          }}
-        />
-      );
-    }
+    if (isAdmin && path.endsWith("/present")) return <GamePresentPage game={game} onGameUpdate={setGame} onExit={()=>navigate(`/admin/games/${game.id}`)} />;
     if (game.status === "lobby" || game.status === "draft") return <GameLobbyPage game={game} isAdmin={isAdmin} onGameUpdate={setGame} onStart={isAdmin ? async()=>{ const updated=await api.startGame(game.id); setGame(updated.game); navigate(`/game/${game.pin}/present`); } : ()=>{}} onBack={()=>navigate(isAdmin?`/admin/games/${game.id}`:"/")} />;
     if (game.status === "active") return <GamePlayerActive game={game} onUpdate={setGame} />;
     return <GameClosedPage game={game} />;
@@ -102,26 +112,10 @@ export default function App() {
   if (joinCode && !sessionId) return joinResolving ? <FullScreenMessage text={`Đang mở phòng ${joinCode}…`} /> : <FullScreenMessage text={joinError ?? "Không tìm thấy phòng."} />;
 
   if (isAdmin && !sessionId) {
-    const editMatch = path.match(/^\/admin\/games\/([^/]+)\/edit$/i);
-    if (editMatch) {
-      const id = editMatch[1];
-      return (
-        <GameBuilderPage
-          gameId={id}
-          onBack={() => navigate(`/admin/games/${id}`)}
-          onCreated={(savedId) => navigate(`/admin/games/${savedId}`)}
-        />
-      );
-    }
-
-    if (path === "/admin/games/new" || adminView === "create") {
-      return <GameBuilderPage onBack={()=>{setAdminView("list");navigate("/admin/games")}} onCreated={id=>{setAdminView("list");navigate(`/admin/games/${id}`)}} />;
-    }
-
+    if (path === "/admin/games/new" || adminView === "create") return <GameBuilderPage onBack={()=>{setAdminView("list");navigate("/admin/games")}} onCreated={id=>{setAdminView("list");navigate(`/admin/games/${id}`)}} />;
     if (path.startsWith("/admin/games/") && path !== "/admin/games/new") {
-      const match = path.match(/^\/admin\/games\/([^/]+)$/i);
-      const id = match?.[1] ?? "";
-      if (!id) return <FullScreenMessage text="Không tìm thấy Game." />;
+      const id=path.split("/").pop()??"";
+      if (path.endsWith("/present")) return <FullScreenMessage text="Đang mở Presentation…" />;
       return <GameManagementPage gameId={id} onLobby={async()=>{ const g=await api.enterGameLobby(id); setGame(g.game); navigate(`/game/${g.game.pin}/present`); }} onEdit={()=>navigate(`/admin/games/${id}/edit`)} onBack={()=>navigate("/admin/games")} />;
     }
     return <AdminHomePage onCreate={()=>{setAdminView("create");navigate("/admin/games/new")}} onOpen={id=>navigate(`/admin/games/${id}`)} />;

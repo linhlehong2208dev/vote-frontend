@@ -35,9 +35,3 @@ body {
   .field-input { @apply w-full rounded-2xl border border-white/10 bg-stage-800 px-4 py-3.5 text-sm font-semibold text-white placeholder:text-white/20 focus:border-amber focus:outline-none focus:ring-2 focus:ring-amber/10; }
   .field-input option { background: #1f1638; color: white; }
 }
-
-@keyframes selectionPop {
-  0% { transform: scale(.97); }
-  55% { transform: scale(1.015); }
-  100% { transform: scale(1); }
-}

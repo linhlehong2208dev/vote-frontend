@@ -46,29 +46,6 @@ export interface ResultsInfo {
   totalParticipants: number;
 }
 
-export interface GameQuestionDashboard {
-  questionId: string;
-  questionNumber: number;
-  question: string;
-  status: SessionStatus;
-  startedAt: string | null;
-  endedAt: string | null;
-  totalVotes: number;
-  noAnswerCount: number;
-  ranking: { optionId: string; label: string; votes: number }[];
-  history: { questionId: string; questionNumber: number; question: string; userId: string; displayName: string; optionId: string | null; optionLabel: string; timestamp: string }[];
-}
-
-export interface GameDashboard {
-  game: { id: string; title: string; pin: string; status: GameStatus; createdAt: string; updatedAt: string };
-  participantCount: number;
-  participants: { id: string; userId: string; displayName: string; joinedAt: string; lastSeenAt: string | null }[];
-  totalVotes: number;
-  questions: GameQuestionDashboard[];
-  voteHistory: GameQuestionDashboard["history"];
-  participantJoinTimestamps: string[];
-}
-
 
 export type GameStatus = "draft" | "lobby" | "active" | "closed";
 export type GameBackgroundType = "color" | "gradient" | "image";
@@ -233,11 +210,6 @@ export const api = {
       method: "POST", body: JSON.stringify(input),
     }),
 
-  updateGame: (gameId: string, input: CreateGameInput) =>
-    request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}`, {
-      method: "PUT", body: JSON.stringify(input),
-    }),
-
   listGames: () => request<{ games: GameInfo[] }>("/api/games"),
 
   getGame: (gameId: string) =>
@@ -253,9 +225,6 @@ export const api = {
 
   getGameParticipantCount: (gameId: string) =>
     request<{ count: number }>(`/api/games/${gameId}/participants/count`),
-
-  getGameParticipants: (gameId: string) =>
-    request<{ participants: { id: string; displayName: string; joinedAt: string; lastSeenAt: string | null }[] }>(`/api/games/${gameId}/participants`),
 
   enterGameLobby: (gameId: string) =>
     request<{ ok: true; game: GameInfo }>(`/api/games/${gameId}/lobby`, { method: "POST" }),
@@ -274,11 +243,8 @@ export const api = {
       `/api/games/${gameId}/stats`,
     ),
 
-  getGameDashboard: (gameId: string) =>
-    request<GameDashboard>(`/api/games/${gameId}/dashboard`),
-
   getQuestionVoters: (gameId: string, questionId: string, optionId?: string) =>
-    request<{ voters: { userId: string; displayName: string; optionId: string | null; timestamp: string }[] }>(
+    request<{ voters: { userId: string; displayName: string; optionId: string | null }[] }>(
       `/api/games/${gameId}/questions/${questionId}/voters${optionId ? `?optionId=${encodeURIComponent(optionId)}` : ""}`,
     ),
 

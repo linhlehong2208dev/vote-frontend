@@ -11,30 +11,14 @@ function getPlayer(gameId: string) {
 
 export function GameLobbyPage({ game, isAdmin, onGameUpdate, onStart, onBack }: { game: GameInfo; isAdmin: boolean; onGameUpdate: (g: GameInfo) => void; onStart?: () => void; onBack: () => void }) {
   const [count, setCount] = useState(0);
-  const [participants, setParticipants] = useState<{ id: string; displayName: string; joinedAt: string; lastSeenAt: string | null }[]>([]);
   const [name, setName] = useState(getPlayer(game.id)?.displayName ?? "");
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState("");
   const joinUrl = `${window.location.origin}/game/${encodeURIComponent(game.pin)}`;
 
-  const loadParticipants = useCallback(async () => {
-    try {
-      if (isAdmin) {
-        // Admin can see the participant list and count.
-        const result = await api.getGameParticipants(game.id);
-        setParticipants(result.participants);
-        setCount(result.participants.length);
-      } else {
-        // Players must only receive the public participant count.
-        // The participant-list endpoint is admin-only.
-        const result = await api.getGameParticipantCount(game.id);
-        setParticipants([]);
-        setCount(result.count);
-      }
-    } catch { /* transient */ }
-  }, [game.id, isAdmin]);
-
-  const loadCount = loadParticipants;
+  const loadCount = useCallback(async () => {
+    try { setCount((await api.getGameParticipantCount(game.id)).count); } catch { /* transient */ }
+  }, [game.id]);
 
   useEffect(() => {
     void loadCount();
@@ -84,7 +68,6 @@ export function GameLobbyPage({ game, isAdmin, onGameUpdate, onStart, onBack }: 
         <h1 className="mt-5 max-w-3xl font-display text-4xl font-black leading-[1.05] tracking-tight md:text-6xl">{game.title}</h1>
         <p className="mt-5 max-w-xl text-sm leading-6 text-white/45 md:text-base">Tham gia bằng QR hoặc nhập Game PIN. Bạn chỉ cần vào một lần — host sẽ đưa bạn đi qua toàn bộ câu hỏi.</p>
         <div className="mt-8 flex items-center justify-center gap-3 md:justify-start"><div className="rounded-2xl bg-white/7 px-5 py-4"><p className="text-xs font-bold text-white/35">NGƯỜI CHƠI</p><p className="mt-1 font-display text-3xl font-black">{count}</p></div><div className="rounded-2xl bg-white/7 px-5 py-4"><p className="text-xs font-bold text-white/35">CÂU HỎI</p><p className="mt-1 font-display text-3xl font-black">{game.questions?.length ?? 0}</p></div></div>
-        {participants.length > 0 && <div className="mt-6 rounded-3xl border border-white/10 bg-white/[.045] p-5 text-left backdrop-blur-xl"><div className="flex items-center justify-between"><p className="text-xs font-extrabold uppercase tracking-[.18em] text-white/40">NGƯỜI THAM GIA</p><span className="text-xs font-bold text-white/30">{participants.length}</span></div><div className="mt-4 grid max-h-48 grid-cols-2 gap-2 overflow-auto md:grid-cols-3">{participants.map((p, i) => <div key={p.id} className="rounded-xl bg-white/[.06] px-3 py-2 text-sm font-bold text-white/80"><span className="mr-2 text-white/25">{i + 1}</span>{p.displayName}</div>)}</div></div>}
       </section>
 
       <section className="rounded-[32px] border border-white/10 bg-white/[.055] p-5 shadow-2xl backdrop-blur-xl md:p-7">
