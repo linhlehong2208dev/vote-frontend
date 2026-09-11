@@ -1,3 +1,4 @@
+// src/hooks/useAuth.tsx
 import {
   createContext,
   useContext,
@@ -33,7 +34,6 @@ function toProfile(session: Session | null): UserProfile | null {
   const meta = session.user.user_metadata ?? {};
   return {
     email: session.user.email ?? "",
-    // Google trả về 'full_name' (đôi khi 'name'), dùng email làm fallback cuối cùng.
     fullName:
       (meta.full_name as string) ||
       (meta.name as string) ||
@@ -65,9 +65,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function signInWithGoogle() {
     // Giữ lại URL phòng hiện tại để sau khi Google OAuth quay về root,
-    // App có thể đưa user trở lại đúng /join/VN01.
+    // App có thể đưa user trở lại đúng /join/VN01 HOẶC /game/ABCD.
+    //
+    // FIX: trước đây chỉ check "/join/" và "?session=" nên luồng quét QR
+    // Game PIN (/game/ABCD) bị rơi mất path sau khi redirect, khiến user
+    // đăng nhập xong lại phải tự nhập PIN thay vì vào thẳng lobby.
     const returnPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-    if (returnPath.startsWith("/join/") || window.location.search.includes("session=")) {
+    const shouldPersistReturnPath =
+      returnPath.startsWith("/join/") ||
+      returnPath.startsWith("/game/") ||
+      window.location.search.includes("session=");
+
+    if (shouldPersistReturnPath) {
       sessionStorage.setItem("vote_auth_return_path", returnPath);
     } else {
       sessionStorage.removeItem("vote_auth_return_path");
@@ -76,7 +85,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        // Giữ origin để không phải khai báo từng /join/<code> trong Supabase Redirect URLs.
         redirectTo: window.location.origin,
         ...(ALLOWED_DOMAIN_HINT
           ? { queryParams: { hd: ALLOWED_DOMAIN_HINT } }

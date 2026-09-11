@@ -82,7 +82,7 @@ export function CreateQuestionPage({
               setQuestion("");
               setOptions(["", ""]);
             }}
-            className="flex-1 rounded-xl border border-white/20 py-3 font-display font-semibold text-white
+            className="flex-1 rounded-xl border border-stage-700 py-3 font-display font-semibold text-ink-900
               transition-all active:translate-y-1"
           >
             Tạo câu hỏi khác
@@ -91,7 +91,7 @@ export function CreateQuestionPage({
         {onCancel && (
           <button
             onClick={onCancel}
-            className="text-sm text-white/40 underline underline-offset-2"
+            className="text-sm text-ink-500 underline underline-offset-2"
           >
             ← Về danh sách câu hỏi
           </button>
@@ -106,17 +106,17 @@ export function CreateQuestionPage({
         <button
           type="button"
           onClick={onCancel}
-          className="mb-4 self-start text-sm text-white/40 underline underline-offset-2"
+          className="mb-4 self-start text-sm text-ink-500 underline underline-offset-2"
         >
           ← Quay lại danh sách
         </button>
       )}
 
-      <h1 className="font-display text-2xl font-bold text-white">
+      <h1 className="font-display text-2xl font-bold text-ink-900">
         Tạo câu hỏi mới
       </h1>
       <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
-        <label className="flex flex-col gap-1.5 text-sm text-white/70">
+        <label className="flex flex-col gap-1.5 text-sm text-ink-700">
           Mã câu hỏi
           <input
             value={joinCode}
@@ -124,40 +124,40 @@ export function CreateQuestionPage({
             placeholder="VN01"
             maxLength={8}
             autoCapitalize="characters"
-            className="rounded-xl border border-white/10 bg-stage-800 px-4 py-3 font-mono font-semibold tracking-widest text-white
-              placeholder:text-white/30 focus:border-amber focus:outline-none"
+            className="rounded-xl border border-stage-700 bg-stage-800 px-4 py-3 font-mono font-semibold tracking-widest text-ink-900
+              placeholder:text-ink-300 focus:border-amber focus:outline-none"
           />
-          <span className="text-xs text-white/35">3-8 ký tự chữ hoặc số. User sẽ vào bằng link /join/VN01.</span>
+          <span className="text-xs text-ink-300">3-8 ký tự chữ hoặc số. User sẽ vào bằng link /join/VN01.</span>
         </label>
 
-        <label className="flex flex-col gap-1.5 text-sm text-white/70">
+        <label className="flex flex-col gap-1.5 text-sm text-ink-700">
           Câu hỏi
           <textarea
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             rows={2}
             placeholder="Tiết mục nào hay nhất?"
-            className="rounded-xl border border-white/10 bg-stage-800 px-4 py-3 text-white
-              placeholder:text-white/30 focus:border-amber focus:outline-none"
+            className="rounded-xl border border-stage-700 bg-stage-800 px-4 py-3 text-ink-900
+              placeholder:text-ink-300 focus:border-amber focus:outline-none"
           />
         </label>
 
         <div className="flex flex-col gap-2">
-          <span className="text-sm text-white/70">Lựa chọn (tối thiểu 2)</span>
+          <span className="text-sm text-ink-700">Lựa chọn (tối thiểu 2)</span>
           {options.map((opt, i) => (
             <div key={i} className="flex gap-2">
               <input
                 value={opt}
                 onChange={(e) => updateOption(i, e.target.value)}
                 placeholder={`Lựa chọn ${i + 1}`}
-                className="flex-1 rounded-xl border border-white/10 bg-stage-800 px-4 py-2.5 text-white
-                  placeholder:text-white/30 focus:border-amber focus:outline-none"
+                className="flex-1 rounded-xl border border-stage-700 bg-stage-800 px-4 py-2.5 text-ink-900
+                  placeholder:text-ink-300 focus:border-amber focus:outline-none"
               />
               {options.length > 2 && (
                 <button
                   type="button"
                   onClick={() => removeOption(i)}
-                  className="shrink-0 rounded-xl px-3 text-white/40 hover:text-coral"
+                  className="shrink-0 rounded-xl px-3 text-ink-500 hover:text-coral"
                   aria-label="Xóa lựa chọn"
                 >
                   ✕

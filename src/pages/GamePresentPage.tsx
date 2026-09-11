@@ -58,7 +58,7 @@ export function GamePresentPage({
     try {
       onGameUpdate((await api.startGame(game.id)).game);
     } catch (error) {
-      console.error("Không thể bắt đầu trò chơi:", error);
+      console.error("KhÃ´ng thá»ƒ báº¯t Ä‘áº§u trÃ² chÆ¡i:", error);
     } finally {
       setAdvancing(false);
     }
@@ -70,7 +70,7 @@ export function GamePresentPage({
     try {
       onGameUpdate((await api.nextGameQuestion(game.id)).game);
     } catch (error) {
-      console.error("Không thể chuyển câu hỏi:", error);
+      console.error("KhÃ´ng thá»ƒ chuyá»ƒn cÃ¢u há»i:", error);
     } finally {
       setAdvancing(false);
     }
@@ -131,31 +131,31 @@ export function GamePresentPage({
   if (game.status === "lobby")
     return (
       <div
-        className="min-h-screen overflow-hidden text-white"
+        className="min-h-screen overflow-hidden text-ink-900"
         style={background}
       >
         <div className="min-h-screen bg-black/25 px-5 py-5 md:px-8 md:py-7">
           <header className="mx-auto flex max-w-7xl items-center justify-between">
             <button
               onClick={onExit}
-              className="rounded-xl bg-black/20 px-4 py-2 text-sm font-bold text-white/55 transition hover:bg-black/30 hover:text-white"
+              className="rounded-xl bg-black/20 px-4 py-2 text-sm font-bold text-ink-500 transition hover:bg-black/30 hover:text-ink-900"
             >
-              ← Quản lý Game
+              â† Quáº£n lÃ½ Game
             </button>
-            <div className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-xs font-black uppercase tracking-[.16em] text-white/60">
+            <div className="rounded-full border border-stage-700 bg-black/20 px-4 py-2 text-xs font-black uppercase tracking-[.16em] text-ink-700">
               Host Lobby
             </div>
           </header>
 
           <main className="mx-auto grid min-h-[calc(100vh-105px)] max-w-7xl items-center gap-8 py-6 lg:grid-cols-[minmax(0,1fr)_400px]">
-            <section className="min-w-0 rounded-[36px] border border-white/10 bg-black/20 p-6 shadow-2xl backdrop-blur-md md:p-9">
+            <section className="min-w-0 rounded-[36px] border border-stage-700 bg-black/20 p-6 shadow-2xl backdrop-blur-md md:p-9">
               <div className="flex flex-wrap items-center gap-3">
                 <span className="inline-flex items-center gap-2 rounded-full border border-amber/20 bg-amber/10 px-3 py-1.5 text-xs font-extrabold text-amber">
                   <span className="h-2 w-2 animate-pulse rounded-full bg-amber" />{" "}
-                  ĐANG CHỜ NGƯỜI CHƠI
+                  ÄANG CHá»œ NGÆ¯á»œI CHÆ I
                 </span>
-                <span className="rounded-full bg-white/8 px-3 py-1.5 text-xs font-bold text-white/50">
-                  {game.questions?.length ?? 0} câu hỏi
+                <span className="rounded-full bg-white/8 px-3 py-1.5 text-xs font-bold text-ink-500">
+                  {game.questions?.length ?? 0} cÃ¢u há»i
                 </span>
               </div>
               {game.cover_url && (
@@ -168,36 +168,36 @@ export function GamePresentPage({
               <h1 className="mt-5 font-display text-4xl font-black leading-tight md:text-6xl">
                 {game.title}
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-white/45 md:text-base">
-                Người chơi quét QR hoặc nhập Game PIN. Khi mọi người đã sẵn
-                sàng, bạn có thể bắt đầu trò chơi.
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-ink-900/45 md:text-base">
+                NgÆ°á»i chÆ¡i quÃ©t QR hoáº·c nháº­p Game PIN. Khi má»i ngÆ°á»i Ä‘Ã£ sáºµn
+                sÃ ng, báº¡n cÃ³ thá»ƒ báº¯t Ä‘áº§u trÃ² chÆ¡i.
               </p>
 
               <div className="mt-7 flex flex-wrap items-end gap-5">
                 <div>
-                  <p className="text-xs font-extrabold uppercase tracking-[.18em] text-white/35">
-                    TỔNG NGƯỜI THAM GIA
+                  <p className="text-xs font-extrabold uppercase tracking-[.18em] text-ink-300">
+                    Tá»”NG NGÆ¯á»œI THAM GIA
                   </p>
                   <p className="mt-1 font-display text-6xl font-black text-amber">
                     {count}
                   </p>
                 </div>
-                <div className="pb-2 text-sm font-semibold text-white/35">
-                  người chơi đang ở trong lobby
+                <div className="pb-2 text-sm font-semibold text-ink-300">
+                  ngÆ°á»i chÆ¡i Ä‘ang á»Ÿ trong lobby
                 </div>
               </div>
 
-              <div className="mt-8 border-t border-white/10 pt-6">
+              <div className="mt-8 border-t border-stage-700 pt-6">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-xs font-extrabold uppercase tracking-[.18em] text-white/35">
-                      NGƯỜI THAM GIA
+                    <p className="text-xs font-extrabold uppercase tracking-[.18em] text-ink-300">
+                      NGÆ¯á»œI THAM GIA
                     </p>
-                    <p className="mt-1 text-sm text-white/35">
-                      Danh sách cập nhật tự động
+                    <p className="mt-1 text-sm text-ink-300">
+                      Danh sÃ¡ch cáº­p nháº­t tá»± Ä‘á»™ng
                     </p>
                   </div>
-                  <span className="rounded-full bg-white/8 px-3 py-1 text-xs font-black text-white/50">
+                  <span className="rounded-full bg-white/8 px-3 py-1 text-xs font-black text-ink-500">
                     {participants.length}
                   </span>
                 </div>
@@ -208,18 +208,18 @@ export function GamePresentPage({
                         key={p.id}
                         className="flex min-h-[92px] min-w-0 flex-col items-center justify-center rounded-[24px] bg-white/6 px-3 py-3 text-center shadow-[0_18px_40px_rgba(15,23,42,0.28)] backdrop-blur-sm"
                       >
-                        <span className="mb-2 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/10 text-xs font-black text-white/75">
+                        <span className="mb-2 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/10 text-xs font-black text-ink-700">
                           {i + 1}
                         </span>
-                        <span className="w-full truncate text-sm font-extrabold leading-5 text-white">
+                        <span className="w-full truncate text-sm font-extrabold leading-5 text-ink-900">
                           {p.display_name}
                         </span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="mt-5 rounded-2xl border border-dashed border-white/10 px-5 py-8 text-center text-sm font-semibold text-white/30">
-                    Chưa có người chơi nào. Hãy chia sẻ QR hoặc Game PIN.
+                  <div className="mt-5 rounded-2xl border border-dashed border-stage-700 px-5 py-8 text-center text-sm font-semibold text-ink-900/30">
+                    ChÆ°a cÃ³ ngÆ°á»i chÆ¡i nÃ o. HÃ£y chia sáº» QR hoáº·c Game PIN.
                   </div>
                 )}
               </div>
@@ -229,11 +229,11 @@ export function GamePresentPage({
                 disabled={advancing || game.status !== "lobby"}
                 className="mt-8 w-full rounded-2xl bg-amber py-4 font-display text-lg font-black text-stage-950 shadow-xl transition hover:-translate-y-0.5 hover:shadow-2xl disabled:cursor-wait disabled:opacity-50"
               >
-                {advancing ? "Đang bắt đầu…" : "Bắt đầu trò chơi →"}
+                {advancing ? "Äang báº¯t Ä‘áº§uâ€¦" : "Báº¯t Ä‘áº§u trÃ² chÆ¡i â†’"}
               </button>
             </section>
 
-            <aside className="rounded-[36px] border border-white/10 bg-white/[.055] p-5 shadow-2xl backdrop-blur-xl md:p-7 lg:sticky lg:top-6">
+            <aside className="rounded-[36px] border border-stage-700 bg-white/[.055] p-5 shadow-2xl backdrop-blur-xl md:p-7 lg:sticky lg:top-6">
               <div className="rounded-[28px] bg-white p-5 shadow-2xl md:p-6">
                 <QRCodeSVG
                   value={joinUrl}
@@ -242,18 +242,18 @@ export function GamePresentPage({
                   level="M"
                 />
               </div>
-              <p className="mt-5 text-center text-sm font-bold text-white/45">
-                Quét mã để tham gia Game
+              <p className="mt-5 text-center text-sm font-bold text-ink-900/45">
+                QuÃ©t mÃ£ Ä‘á»ƒ tham gia Game
               </p>
               <div className="mt-6 rounded-[28px] bg-black/25 p-6 text-center">
-                <p className="text-xs font-extrabold uppercase tracking-[.25em] text-white/35">
+                <p className="text-xs font-extrabold uppercase tracking-[.25em] text-ink-300">
                   GAME PIN
                 </p>
                 <p className="mt-2 break-all font-mono text-5xl font-black tracking-[.16em] text-amber md:text-6xl">
                   {game.pin}
                 </p>
-                <p className="mt-3 text-xs leading-5 text-white/30">
-                  Mở {window.location.host}/game/{game.pin}
+                <p className="mt-3 text-xs leading-5 text-ink-900/30">
+                  Má»Ÿ {window.location.host}/game/{game.pin}
                 </p>
               </div>
             </aside>
@@ -264,7 +264,7 @@ export function GamePresentPage({
 
   if (game.status === "closed")
     return finalResults ? (
-      <div className="min-h-screen bg-stage-950 px-5 py-8 text-white md:px-8">
+      <div className="min-h-screen bg-stage-950 px-5 py-8 text-ink-900 md:px-8">
         <main className="mx-auto max-w-7xl">
           <header className="flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -279,15 +279,15 @@ export function GamePresentPage({
               onClick={onExit}
               className="rounded-2xl bg-white px-5 py-3 font-black text-stage-950"
             >
-              ← Quản lý Game
+              â† Quáº£n lÃ½ Game
             </button>
           </header>
-          <div className="mt-6 flex flex-wrap gap-3 text-sm font-bold text-white/45">
+          <div className="mt-6 flex flex-wrap gap-3 text-sm font-bold text-ink-900/45">
             <span className="rounded-full bg-white/8 px-4 py-2">
-              {finalResults.participantCount} người chơi
+              {finalResults.participantCount} ngÆ°á»i chÆ¡i
             </span>
             <span className="rounded-full bg-white/8 px-4 py-2">
-              {finalResults.totalVotes} lượt vote
+              {finalResults.totalVotes} lÆ°á»£t vote
             </span>
           </div>
           <div className="mt-8 grid gap-6 lg:grid-cols-2">
@@ -296,23 +296,23 @@ export function GamePresentPage({
               return (
                 <section
                   key={q.questionId}
-                  className="rounded-[28px] border border-white/10 bg-white/[.045] p-6"
+                  className="rounded-[28px] border border-stage-700 bg-white/[.045] p-6"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-xs font-extrabold text-amber">
-                        CÂU {q.questionNumber}
+                        CÃ‚U {q.questionNumber}
                       </p>
                       <h2 className="mt-2 font-display text-xl font-black">
                         {q.question}
                       </h2>
                     </div>
-                    <div className="text-right text-xs font-bold text-white/40">
+                    <div className="text-right text-xs font-bold text-ink-500">
                       <p>{q.totalVotes} vote</p>
-                      <p>{q.noAnswerCount} chưa trả lời</p>
+                      <p>{q.noAnswerCount} chÆ°a tráº£ lá»i</p>
                     </div>
                   </div>
-                  <div className="mt-7 flex min-h-[260px] items-end gap-3 border-t border-white/8 pt-5">
+                  <div className="mt-7 flex min-h-[260px] items-end gap-3 border-t border-stage-700 pt-5">
                     {q.ranking.map((item, i) => (
                       <div
                         key={item.optionId}
@@ -329,8 +329,8 @@ export function GamePresentPage({
                             }}
                           />
                         </div>
-                        <span className="w-full truncate text-center text-xs font-bold text-white/55">
-                          {String.fromCharCode(65 + i)} · {item.label}
+                        <span className="w-full truncate text-center text-xs font-bold text-ink-500">
+                          {String.fromCharCode(65 + i)} Â· {item.label}
                         </span>
                       </div>
                     ))}
@@ -342,16 +342,16 @@ export function GamePresentPage({
         </main>
       </div>
     ) : (
-      <div className="grid min-h-screen place-items-center bg-stage-950 px-6 text-center text-white">
+      <div className="grid min-h-screen place-items-center bg-stage-950 px-6 text-center text-ink-900">
         <div>
           <div className="mx-auto grid h-24 w-24 place-items-center rounded-3xl bg-amber text-5xl text-stage-950">
-            ✓
+            âœ“
           </div>
           <p className="mt-7 text-sm font-extrabold uppercase tracking-[.3em] text-amber">
             GAME COMPLETE
           </p>
           <h1 className="mt-3 font-display text-5xl font-black md:text-7xl">
-            Đang tải kết quả…
+            Äang táº£i káº¿t quáº£â€¦
           </h1>
         </div>
       </div>
@@ -359,13 +359,13 @@ export function GamePresentPage({
 
   if (!current)
     return (
-      <div className="grid min-h-screen place-items-center bg-stage-950 text-white">
-        Không có câu hỏi.
+      <div className="grid min-h-screen place-items-center bg-stage-950 text-ink-900">
+        KhÃ´ng cÃ³ cÃ¢u há»i.
       </div>
     );
   return (
     <div
-      className="min-h-screen text-white"
+      className="min-h-screen text-ink-900"
       style={{
         background:
           current.background_type === "image" && current.background_value
@@ -379,15 +379,15 @@ export function GamePresentPage({
       <div className="min-h-screen bg-black/20 px-5 py-6 md:px-10 md:py-8">
         <div className="flex items-center justify-between">
           <div className="rounded-full bg-black/25 px-4 py-2 text-sm font-extrabold">
-            CÂU {current.sort_order} / {game.questions?.length}
+            CÃ‚U {current.sort_order} / {game.questions?.length}
           </div>
           <div
-            className={`grid h-20 w-20 place-items-center rounded-full border-4 font-mono text-3xl font-black ${seconds <= 5 && !timeUp ? "border-coral bg-coral/20 text-coral animate-pulse" : "border-white/30 bg-black/20"}`}
+            className={`grid h-20 w-20 place-items-center rounded-full border-4 font-mono text-3xl font-black ${seconds <= 5 && !timeUp ? "border-coral bg-coral/20 text-coral animate-pulse" : "border-stage-700 bg-black/20"}`}
           >
             {timeUp ? 0 : seconds}
           </div>
           <div className="rounded-full bg-black/25 px-4 py-2 text-sm font-extrabold">
-            {count} người chơi
+            {count} ngÆ°á»i chÆ¡i
           </div>
         </div>
         <main className="mx-auto flex min-h-[calc(100vh-130px)] max-w-7xl flex-col justify-center">
@@ -418,17 +418,17 @@ export function GamePresentPage({
           </div>
           {timeUp && (
             <div className="mt-8 flex flex-col items-center gap-4 rounded-[28px] bg-black/30 p-6 backdrop-blur-sm">
-              <p className="text-xl font-black">Hết giờ</p>
+              <p className="text-xl font-black">Háº¿t giá»</p>
               <button
                 disabled={advancing}
                 onClick={() => void handleNext()}
                 className="rounded-2xl bg-amber px-8 py-4 text-lg font-black text-stage-950 shadow-xl transition hover:scale-[1.02] disabled:cursor-wait disabled:opacity-50"
               >
                 {advancing
-                  ? "Đang chuyển…"
+                  ? "Äang chuyá»ƒnâ€¦"
                   : current.sort_order === (game.questions?.length ?? 0)
-                    ? "Xem kết quả →"
-                    : "Câu tiếp theo →"}
+                    ? "Xem káº¿t quáº£ â†’"
+                    : "CÃ¢u tiáº¿p theo â†’"}
               </button>
             </div>
           )}
@@ -437,3 +437,4 @@ export function GamePresentPage({
     </div>
   );
 }
+

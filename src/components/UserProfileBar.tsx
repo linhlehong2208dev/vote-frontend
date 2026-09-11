@@ -1,3 +1,4 @@
+// src/components/UserProfileBar.tsx
 import { useAuth } from "../hooks/useAuth";
 
 export function UserProfileBar() {
@@ -12,7 +13,7 @@ export function UserProfileBar() {
     .join("");
 
   return (
-    <div className="flex w-full items-center gap-3 rounded-xl bg-stage-800 px-4 py-3">
+    <div className="flex w-full items-center gap-3 rounded-xl border border-stage-700 bg-stage-800 px-4 py-3">
       {profile.avatarUrl ? (
         <img
           src={profile.avatarUrl}
@@ -21,19 +22,19 @@ export function UserProfileBar() {
           referrerPolicy="no-referrer"
         />
       ) : (
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber font-display font-bold text-stage-900">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber font-display font-bold text-white">
           {initials || "?"}
         </div>
       )}
       <div className="min-w-0 flex-1 text-left">
-        <p className="truncate font-display text-sm font-semibold text-white">
+        <p className="truncate font-display text-sm font-semibold text-ink-900">
           Xin chào, {profile.fullName}
         </p>
-        <p className="truncate text-xs text-white/50">{profile.email}</p>
+        <p className="truncate text-xs text-ink-500">{profile.email}</p>
       </div>
       <button
         onClick={signOut}
-        className="shrink-0 text-xs text-white/40 underline underline-offset-2 hover:text-white/70"
+        className="shrink-0 text-xs text-ink-500 underline underline-offset-2 hover:text-ink-900"
       >
         Đăng xuất
       </button>

@@ -1,10 +1,11 @@
-type TileColor = 'coral' | 'sky' | 'amber' | 'emerald';
+// src/components/OptionTile.tsx
+type TileColor = "coral" | "sky" | "amber" | "emerald";
 
 const COLOR_MAP: Record<TileColor, string> = {
-  coral: 'bg-coral',
-  sky: 'bg-sky',
-  amber: 'bg-amber text-stage-900',
-  emerald: 'bg-emerald text-stage-900',
+  coral: "bg-coral text-white",
+  sky: "bg-sky text-white",
+  amber: "bg-amber text-white",
+  emerald: "bg-emerald text-white",
 };
 
 const SHAPES: Record<TileColor, JSX.Element> = {
@@ -30,7 +31,7 @@ const SHAPES: Record<TileColor, JSX.Element> = {
   ),
 };
 
-const ORDER: TileColor[] = ['coral', 'sky', 'amber', 'emerald'];
+const ORDER: TileColor[] = ["coral", "sky", "amber", "emerald"];
 
 interface OptionTileProps {
   index: number;
@@ -40,7 +41,13 @@ interface OptionTileProps {
   onSelect: () => void;
 }
 
-export function OptionTile({ index, label, selected, disabled, onSelect }: OptionTileProps) {
+export function OptionTile({
+  index,
+  label,
+  selected,
+  disabled,
+  onSelect,
+}: OptionTileProps) {
   const color = ORDER[index % ORDER.length];
 
   return (
@@ -56,13 +63,13 @@ export function OptionTile({ index, label, selected, disabled, onSelect }: Optio
         active:translate-y-1 active:shadow-tile-active
         disabled:cursor-not-allowed disabled:opacity-40 disabled:active:translate-y-0
         ${COLOR_MAP[color]}
-        ${selected ? 'ring-4 ring-white ring-offset-2 ring-offset-stage-900' : ''}
+        ${selected ? "ring-4 ring-amber ring-offset-2 ring-offset-stage-900" : ""}
       `}
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-black/15">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15">
         {SHAPES[color]}
       </span>
-      <span className="text-white/95">{label}</span>
+      <span className="text-white">{label}</span>
     </button>
   );
 }

@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
+/* src/styles/index.css */
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -11,12 +12,12 @@ body,
 }
 
 body {
-  background-color: #17102b;
+  background-color: #ffffff;
   background-image:
-    radial-gradient(circle at 15% 10%, rgba(255, 182, 39, 0.10), transparent 40%),
-    radial-gradient(circle at 85% 90%, rgba(76, 154, 255, 0.12), transparent 45%);
-  color: #f4f1fb;
-  font-family: 'Montserrat', sans-serif;
+    radial-gradient(circle at 15% 8%, rgba(228, 0, 43, 0.06), transparent 40%),
+    radial-gradient(circle at 85% 92%, rgba(228, 0, 43, 0.05), transparent 45%);
+  color: #161616;
+  font-family: "Montserrat", sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -25,13 +26,23 @@ body {
 }
 
 :focus-visible {
-  outline: 3px solid #ffb627;
+  outline: 3px solid #e4002b;
   outline-offset: 2px;
 }
 
 @layer components {
-  .field-label { @apply mb-2 block text-xs font-extrabold uppercase tracking-[0.12em] text-white/45; }
-  .field-label em { @apply font-medium normal-case tracking-normal text-white/20; font-style: normal; }
-  .field-input { @apply w-full rounded-2xl border border-white/10 bg-stage-800 px-4 py-3.5 text-sm font-semibold text-white placeholder:text-white/20 focus:border-amber focus:outline-none focus:ring-2 focus:ring-amber/10; }
-  .field-input option { background: #1f1638; color: white; }
+  .field-label {
+    @apply mb-2 block text-xs font-extrabold uppercase tracking-[0.12em] text-ink-500;
+  }
+  .field-label em {
+    @apply font-medium normal-case tracking-normal text-ink-300;
+    font-style: normal;
+  }
+  .field-input {
+    @apply w-full rounded-2xl border border-stage-700 bg-white px-4 py-3.5 text-sm font-semibold text-ink-900 placeholder:text-ink-300 focus:border-amber focus:outline-none focus:ring-2 focus:ring-amber/10;
+  }
+  .field-input option {
+    background: #ffffff;
+    color: #161616;
+  }
 }

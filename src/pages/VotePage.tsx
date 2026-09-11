@@ -1,9 +1,11 @@
+// src/pages/VotePage.tsx
 import { useEffect, useState } from "react";
 import { api, type ResultsInfo } from "../lib/api";
 import { useSessionState } from "../hooks/useSessionState";
 import { CountdownRing } from "../components/CountdownRing";
 import { OptionTile } from "../components/OptionTile";
 import { ResultsBoard } from "../components/ResultsBoard";
+import { LoadingSpinner } from "../components/LoadingSpinner";
 import { useAuth } from "../hooks/useAuth";
 
 const CLOSING_GRACE_MS = 2000;
@@ -18,18 +20,11 @@ export function VotePage({ sessionId }: { sessionId: string }) {
   const [joinError, setJoinError] = useState<string | null>(null);
   const [showClosingState, setShowClosingState] = useState(false);
 
-  // Chỉ được bình chọn khi session đang active VÀ vẫn còn thời gian.
-  //
-  // displaySeconds === null:
-  // Chưa có dữ liệu timer => khóa tạm thời để tránh vote nhầm
-  // trong khoảng thời gian frontend đang khởi tạo timer.
   const canVote =
     session?.status === "active" &&
     displaySeconds !== null &&
     displaySeconds > 0;
 
-  // Mỗi vòng vote cần một log join. Khi session được "Bắt đầu lại", backend
-  // xóa log của vòng cũ nên effect này phải chạy lại khi status đổi từ closed -> active.
   useEffect(() => {
     if (!session || session.status === "closed") return;
     api.join(sessionId).catch((err) => setJoinError(err.message));
@@ -49,8 +44,6 @@ export function VotePage({ sessionId }: { sessionId: string }) {
     return () => window.clearTimeout(id);
   }, [displaySeconds, session?.status]);
 
-  // Đếm số người đã JOIN (không phải số người đã vote). Polling nhẹ 1.5s giúp
-  // màn hình chờ cập nhật ngay cả khi Realtime chưa kịp kết nối.
   useEffect(() => {
     if (!session || session.status === "closed") return;
 
@@ -65,7 +58,6 @@ export function VotePage({ sessionId }: { sessionId: string }) {
     return () => clearInterval(id);
   }, [sessionId, session?.status]);
 
-  // Khi đóng, tự động lấy kết quả. Khi mở lại vòng mới, xóa kết quả cũ ngay.
   useEffect(() => {
     if (session?.status === "closed") {
       api
@@ -79,26 +71,15 @@ export function VotePage({ sessionId }: { sessionId: string }) {
   }, [session?.status, sessionId]);
 
   async function handleSelect(optionId: string) {
-    // Frontend chặn vote khi:
-    // - session không active
-    // - timer chưa sẵn sàng
-    // - timer đã hết
-    // - đang gửi một request vote khác
     if (!canVote || selecting) return;
 
     setSelecting(true);
-
     const previous = selectedOptionId;
-
-    // Optimistic UI
     setSelectedOptionId(optionId);
 
     try {
       await api.select(sessionId, optionId);
     } catch (err) {
-      // Backend vẫn là nguồn sự thật.
-      // Nếu backend từ chối (ví dụ vừa hết deadline),
-      // rollback lựa chọn trên UI.
       setSelectedOptionId(previous);
     } finally {
       setSelecting(false);
@@ -112,25 +93,31 @@ export function VotePage({ sessionId }: { sessionId: string }) {
   }
 
   if (!session) {
-    return <CenteredMessage title="Đang tải..." />;
+    return (
+      <LoadingSpinner
+        fullScreen
+        variant="ring"
+        label="Đang tải phiên bình chọn..."
+      />
+    );
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-md flex-col px-4 pb-10 pt-6">
+    <div className="mx-auto flex min-h-screen max-w-md flex-col px-4 pb-10 pt-6 animate-pageIn">
       <header className="mb-6 flex items-center justify-between">
-        <span className="font-display text-sm font-semibold uppercase tracking-wide text-white/40">
+        <span className="font-display text-sm font-semibold uppercase tracking-wide text-ink-500">
           Bình chọn văn nghệ
         </span>
 
         <button
           onClick={signOut}
-          className="text-xs text-white/40 underline underline-offset-2"
+          className="text-xs text-ink-500 underline underline-offset-2 hover:text-ink-900"
         >
           Đăng xuất
         </button>
       </header>
 
-      <h1 className="font-display text-2xl font-bold leading-tight text-white">
+      <h1 className="font-display text-2xl font-bold leading-tight text-ink-900">
         {session.question}
       </h1>
 
@@ -150,7 +137,7 @@ export function VotePage({ sessionId }: { sessionId: string }) {
             />
 
             {joinedCount != null && (
-              <p className="mt-3 text-sm text-white/50">
+              <p className="mt-3 text-sm text-ink-500">
                 {joinedCount} người đã sẵn sàng
               </p>
             )}
@@ -178,7 +165,7 @@ export function VotePage({ sessionId }: { sessionId: string }) {
               displaySeconds === 0 &&
               (showClosingState ? (
                 <div className="mt-4 flex flex-col items-center gap-3 rounded-2xl border border-amber/20 bg-amber/10 px-4 py-3 text-center text-sm text-amber">
-                  <div className="h-9 w-9 animate-spin rounded-full border-2 border-amber/30 border-t-amber" />
+                  <LoadingSpinner variant="ring" size="sm" />
                   <p className="font-semibold">
                     Đang chốt kết quả, vui lòng chờ…
                   </p>
@@ -200,7 +187,7 @@ export function VotePage({ sessionId }: { sessionId: string }) {
             {results ? (
               <ResultsBoard results={results} />
             ) : (
-              <p className="text-white/50">Đang tải kết quả...</p>
+              <LoadingSpinner variant="dots" label="Đang tải kết quả..." />
             )}
           </div>
         )}
@@ -212,19 +199,19 @@ export function VotePage({ sessionId }: { sessionId: string }) {
 function WaitingPanel({ joinedCount }: { joinedCount: number | null }) {
   return (
     <div className="flex flex-col items-center pt-8 text-center">
-      <div className="mb-5 h-3 w-3 animate-pulseSlow rounded-full bg-amber" />
+      <LoadingSpinner variant="dots" />
 
-      <p className="font-display text-lg font-semibold text-white/90">
+      <p className="mt-5 font-display text-lg font-semibold text-ink-900">
         Chờ MC bắt đầu bình chọn
       </p>
 
-      <p className="mt-2 max-w-xs text-sm text-white/50">
+      <p className="mt-2 max-w-xs text-sm text-ink-500">
         Các đáp án đang bị khóa. Khi MC bấm bắt đầu, bộ đếm giờ sẽ hiện ra và
         bạn có thể chọn.
       </p>
 
       {joinedCount != null && (
-        <p className="mt-4 text-xs text-white/40">
+        <p className="mt-4 text-xs text-ink-500">
           {joinedCount} người đã sẵn sàng
         </p>
       )}
@@ -240,10 +227,10 @@ function CenteredMessage({
   detail?: string;
 }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
-      <p className="font-display text-lg font-semibold text-white">{title}</p>
+    <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center animate-pageIn">
+      <p className="font-display text-lg font-semibold text-ink-900">{title}</p>
 
-      {detail && <p className="mt-2 text-sm text-white/50">{detail}</p>}
+      {detail && <p className="mt-2 text-sm text-ink-500">{detail}</p>}
     </div>
   );
 }

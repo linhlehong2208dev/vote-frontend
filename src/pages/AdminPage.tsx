@@ -32,13 +32,13 @@ export function AdminPage({ sessionId }: { sessionId: string }) {
       const next = await api.getLiveStats(sessionId);
       setStats(next);
     } catch {
-      // Realtime sẽ tiếp tục trigger lần refresh kế tiếp.
+      // Realtime sáº½ tiáº¿p tá»¥c trigger láº§n refresh káº¿ tiáº¿p.
     }
   }
 
-  // Initial load + realtime: join tạo vote_logs INSERT, chọn/đổi đáp án
-  // tạo selections INSERT/UPDATE. Debounce nhẹ để tránh gọi API 2 lần liên tiếp
-  // khi user vừa join vừa vote.
+  // Initial load + realtime: join táº¡o vote_logs INSERT, chá»n/Ä‘á»•i Ä‘Ã¡p Ã¡n
+  // táº¡o selections INSERT/UPDATE. Debounce nháº¹ Ä‘á»ƒ trÃ¡nh gá»i API 2 láº§n liÃªn tiáº¿p
+  // khi user vá»«a join vá»«a vote.
   useEffect(() => {
     if (!session || session.status === "closed") return;
 
@@ -52,9 +52,9 @@ export function AdminPage({ sessionId }: { sessionId: string }) {
 
     void refreshStats();
 
-    // Realtime là đường cập nhật chính. Polling 1.5s là fallback để Admin vẫn
-    // cập nhật ngay cả khi browser/Supabase Realtime không giao event (ví dụ
-    // tab mobile ngủ hoặc subscription vừa reconnect). Không cần F5.
+    // Realtime lÃ  Ä‘Æ°á»ng cáº­p nháº­t chÃ­nh. Polling 1.5s lÃ  fallback Ä‘á»ƒ Admin váº«n
+    // cáº­p nháº­t ngay cáº£ khi browser/Supabase Realtime khÃ´ng giao event (vÃ­ dá»¥
+    // tab mobile ngá»§ hoáº·c subscription vá»«a reconnect). KhÃ´ng cáº§n F5.
     const pollId = setInterval(() => {
       void refreshStats();
     }, 1500);
@@ -124,7 +124,7 @@ export function AdminPage({ sessionId }: { sessionId: string }) {
       await refreshStats();
     } catch (err) {
       setActionError(
-        err instanceof ApiError ? err.message : "Thao tác thất bại.",
+        err instanceof ApiError ? err.message : "Thao tÃ¡c tháº¥t báº¡i.",
       );
     } finally {
       setBusy(false);
@@ -135,40 +135,40 @@ export function AdminPage({ sessionId }: { sessionId: string }) {
 
   if (error) {
     return (
-      <CenteredMessage title="Không tải được phiên bình chọn" detail={error} />
+      <CenteredMessage title="KhÃ´ng táº£i Ä‘Æ°á»£c phiÃªn bÃ¬nh chá»n" detail={error} />
     );
   }
   if (!session) {
-    return <CenteredMessage title="Đang tải..." />;
+    return <CenteredMessage title="Äang táº£i..." />;
   }
 
   return (
     <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-4 pb-10 pt-6 sm:px-6">
       <header className="mb-6 flex items-center justify-between">
         <span className="font-display text-sm font-semibold uppercase tracking-wide text-amber">
-          Bảng điều khiển MC
+          Báº£ng Ä‘iá»u khiá»ƒn MC
         </span>
         <button
           onClick={signOut}
-          className="text-xs text-white/40 underline underline-offset-2"
+          className="text-xs text-ink-500 underline underline-offset-2"
         >
-          Đăng xuất
+          ÄÄƒng xuáº¥t
         </button>
       </header>
 
-      <div className="rounded-2xl border border-white/10 bg-stage-800/80 p-5 shadow-tile">
+      <div className="rounded-2xl border border-stage-700 bg-stage-800/80 p-5 shadow-tile">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             {session.join_code && (
               <p className="mb-2 font-mono text-xs font-bold tracking-[0.22em] text-amber">
-                MÃ {session.join_code}
+                MÃƒ {session.join_code}
               </p>
             )}
-            <h1 className="font-display text-2xl font-bold leading-tight text-white">
+            <h1 className="font-display text-2xl font-bold leading-tight text-ink-900">
               {session.question}
             </h1>
-            <p className="mt-1 text-xs uppercase tracking-wide text-white/40">
-              Trạng thái: <StatusLabel status={session.status} />
+            <p className="mt-1 text-xs uppercase tracking-wide text-ink-500">
+              Tráº¡ng thÃ¡i: <StatusLabel status={session.status} />
             </p>
           </div>
         </div>
@@ -189,7 +189,7 @@ export function AdminPage({ sessionId }: { sessionId: string }) {
           showClosingState && (
             <div className="mt-5 rounded-2xl border border-amber/20 bg-amber/10 px-4 py-3 text-center text-sm text-amber">
               <div className="mx-auto mb-2 h-9 w-9 animate-spin rounded-full border-2 border-amber/30 border-t-amber" />
-              Đang chốt kết quả, vui lòng chờ…
+              Äang chá»‘t káº¿t quáº£, vui lÃ²ng chá»â€¦
             </div>
           )}
 
@@ -204,18 +204,18 @@ export function AdminPage({ sessionId }: { sessionId: string }) {
 
       <div className="mt-5 flex flex-col gap-3">
         {(session.status === "pending" || session.status === "closed") && (
-          <div className="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-stage-800/60 p-4">
-            <label className="flex items-center gap-3 text-sm text-white/70">
-              Thời gian đếm ngược
+          <div className="flex flex-col items-center gap-3 rounded-2xl border border-stage-700 bg-stage-800/60 p-4">
+            <label className="flex items-center gap-3 text-sm text-ink-700">
+              Thá»i gian Ä‘áº¿m ngÆ°á»£c
               <input
                 type="number"
                 min={5}
                 max={600}
                 value={duration}
                 onChange={(e) => setDuration(Number(e.target.value))}
-                className="w-20 rounded-lg border border-white/10 bg-stage-800 px-2 py-1 text-center text-white focus:border-amber focus:outline-none"
+                className="w-20 rounded-lg border border-stage-700 bg-stage-800 px-2 py-1 text-center text-ink-900 focus:border-amber focus:outline-none"
               />
-              giây
+              giÃ¢y
             </label>
             <button
               disabled={busy}
@@ -225,8 +225,8 @@ export function AdminPage({ sessionId }: { sessionId: string }) {
               className="w-full rounded-xl bg-emerald py-3 font-display font-semibold text-stage-900 shadow-tile transition-all active:translate-y-1 active:shadow-tile-active disabled:opacity-50"
             >
               {session.status === "closed"
-                ? "Bắt đầu lại"
-                : "Bắt đầu bình chọn"}
+                ? "Báº¯t Ä‘áº§u láº¡i"
+                : "Báº¯t Ä‘áº§u bÃ¬nh chá»n"}
             </button>
           </div>
         )}
@@ -236,16 +236,16 @@ export function AdminPage({ sessionId }: { sessionId: string }) {
             <button
               disabled={busy}
               onClick={() => runAction(() => api.pauseSession(sessionId))}
-              className="flex-1 rounded-xl bg-sky py-3 font-display font-semibold text-white shadow-tile transition-all active:translate-y-1 active:shadow-tile-active disabled:opacity-50"
+              className="flex-1 rounded-xl bg-sky py-3 font-display font-semibold text-ink-900 shadow-tile transition-all active:translate-y-1 active:shadow-tile-active disabled:opacity-50"
             >
-              Tạm dừng
+              Táº¡m dá»«ng
             </button>
             <button
               disabled={busy}
               onClick={() => runAction(() => api.closeSession(sessionId))}
-              className="flex-1 rounded-xl bg-coral py-3 font-display font-semibold text-white shadow-tile transition-all active:translate-y-1 active:shadow-tile-active disabled:opacity-50"
+              className="flex-1 rounded-xl bg-coral py-3 font-display font-semibold text-ink-900 shadow-tile transition-all active:translate-y-1 active:shadow-tile-active disabled:opacity-50"
             >
-              Kết thúc ngay
+              Káº¿t thÃºc ngay
             </button>
           </div>
         )}
@@ -257,14 +257,14 @@ export function AdminPage({ sessionId }: { sessionId: string }) {
               onClick={() => runAction(() => api.resumeSession(sessionId))}
               className="flex-1 rounded-xl bg-emerald py-3 font-display font-semibold text-stage-900 shadow-tile transition-all active:translate-y-1 active:shadow-tile-active disabled:opacity-50"
             >
-              Tiếp tục
+              Tiáº¿p tá»¥c
             </button>
             <button
               disabled={busy}
               onClick={() => runAction(() => api.closeSession(sessionId))}
-              className="flex-1 rounded-xl bg-coral py-3 font-display font-semibold text-white shadow-tile transition-all active:translate-y-1 active:shadow-tile-active disabled:opacity-50"
+              className="flex-1 rounded-xl bg-coral py-3 font-display font-semibold text-ink-900 shadow-tile transition-all active:translate-y-1 active:shadow-tile-active disabled:opacity-50"
             >
-              Kết thúc ngay
+              Káº¿t thÃºc ngay
             </button>
           </div>
         )}
@@ -275,12 +275,12 @@ export function AdminPage({ sessionId }: { sessionId: string }) {
       {session.status === "closed" && (
         <div className="mt-6 w-full">
           <h2 className="mb-4 text-center font-display text-xl font-bold text-amber">
-            Kết quả bình chọn
+            Káº¿t quáº£ bÃ¬nh chá»n
           </h2>
           {results ? (
             <ResultsBoard results={results} />
           ) : (
-            <p className="text-center text-white/50">Đang tải...</p>
+            <p className="text-center text-ink-500">Äang táº£i...</p>
           )}
         </div>
       )}
@@ -300,14 +300,14 @@ function LiveDashboard({
   return (
     <div className="mt-6">
       <div className="mb-4 grid grid-cols-3 gap-2">
-        <MetricCard icon="👥" label="Joined" value={stats.joinedCount} />
-        <MetricCard icon="🗳" label="Voted" value={stats.votedCount} />
-        <MetricCard icon="⏳" label="Waiting" value={stats.waitingCount} />
+        <MetricCard icon="ðŸ‘¥" label="Joined" value={stats.joinedCount} />
+        <MetricCard icon="ðŸ—³" label="Voted" value={stats.votedCount} />
+        <MetricCard icon="â³" label="Waiting" value={stats.waitingCount} />
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-black/10 p-3">
-        <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-white/40">
-          Câu trả lời
+      <div className="rounded-2xl border border-stage-700 bg-black/10 p-3">
+        <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-ink-500">
+          CÃ¢u tráº£ lá»i
         </p>
         <div className="flex flex-col gap-2">
           {options.map((option, index) => {
@@ -318,7 +318,7 @@ function LiveDashboard({
             return (
               <div
                 key={option.id}
-                className="relative overflow-hidden rounded-xl border border-white/10 bg-stage-800 px-4 py-3"
+                className="relative overflow-hidden rounded-xl border border-stage-700 bg-stage-800 px-4 py-3"
               >
                 <div
                   className="absolute inset-y-0 left-0 opacity-10 transition-all duration-300"
@@ -328,10 +328,10 @@ function LiveDashboard({
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 font-display text-sm font-bold text-amber">
                     {String.fromCharCode(65 + index)}
                   </span>
-                  <span className="min-w-0 flex-1 text-sm font-medium text-white/90">
+                  <span className="min-w-0 flex-1 text-sm font-medium text-ink-900/90">
                     {option.label}
                   </span>
-                  <span className="min-w-10 rounded-lg bg-white/10 px-2 py-1 text-right font-display text-sm font-bold text-white">
+                  <span className="min-w-10 rounded-lg bg-white/10 px-2 py-1 text-right font-display text-sm font-bold text-ink-900">
                     {count}
                   </span>
                 </div>
@@ -354,12 +354,12 @@ function MetricCard({
   value: number;
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-stage-800 px-2 py-3 text-center">
+    <div className="rounded-2xl border border-stage-700 bg-stage-800 px-2 py-3 text-center">
       <div className="text-base">{icon}</div>
-      <div className="mt-1 font-display text-xl font-bold text-white">
+      <div className="mt-1 font-display text-xl font-bold text-ink-900">
         {value}
       </div>
-      <div className="text-[10px] font-semibold uppercase tracking-wider text-white/40">
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-ink-500">
         {label}
       </div>
     </div>
@@ -368,12 +368,12 @@ function MetricCard({
 
 function StatusLabel({ status }: { status: string }) {
   const labels: Record<string, string> = {
-    pending: "Chờ bắt đầu",
-    active: "Đang mở",
-    paused: "Tạm dừng",
-    closed: "Đã chốt",
+    pending: "Chá» báº¯t Ä‘áº§u",
+    active: "Äang má»Ÿ",
+    paused: "Táº¡m dá»«ng",
+    closed: "ÄÃ£ chá»‘t",
   };
-  return <span className="text-white/70">{labels[status] ?? status}</span>;
+  return <span className="text-ink-700">{labels[status] ?? status}</span>;
 }
 
 function CenteredMessage({
@@ -385,8 +385,9 @@ function CenteredMessage({
 }) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
-      <p className="font-display text-lg font-semibold text-white">{title}</p>
-      {detail && <p className="mt-2 text-sm text-white/50">{detail}</p>}
+      <p className="font-display text-lg font-semibold text-ink-900">{title}</p>
+      {detail && <p className="mt-2 text-sm text-ink-500">{detail}</p>}
     </div>
   );
 }
+

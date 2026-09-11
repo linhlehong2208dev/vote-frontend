@@ -1,3 +1,4 @@
+// src/components/CountdownRing.tsx
 interface CountdownRingProps {
   seconds: number;
   totalSeconds: number;
@@ -5,10 +6,16 @@ interface CountdownRingProps {
   size?: number;
 }
 
-export function CountdownRing({ seconds, totalSeconds, paused, size = 176 }: CountdownRingProps) {
+export function CountdownRing({
+  seconds,
+  totalSeconds,
+  paused,
+  size = 176,
+}: CountdownRingProps) {
   const radius = size / 2 - 10;
   const circumference = 2 * Math.PI * radius;
-  const fraction = totalSeconds > 0 ? Math.min(1, Math.max(0, seconds / totalSeconds)) : 0;
+  const fraction =
+    totalSeconds > 0 ? Math.min(1, Math.max(0, seconds / totalSeconds)) : 0;
   const offset = circumference * (1 - fraction);
   const urgent = seconds <= 5 && seconds > 0 && !paused;
 
@@ -25,7 +32,7 @@ export function CountdownRing({ seconds, totalSeconds, paused, size = 176 }: Cou
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="rgba(255,255,255,0.12)"
+          stroke="rgba(22,22,22,0.10)"
           strokeWidth={10}
           fill="none"
         />
@@ -33,7 +40,7 @@ export function CountdownRing({ seconds, totalSeconds, paused, size = 176 }: Cou
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={paused ? '#4C9AFF' : urgent ? '#FF5D5D' : '#FFB627'}
+          stroke={paused ? "#1C1C1E" : urgent ? "#FF3B30" : "#E4002B"}
           strokeWidth={10}
           fill="none"
           strokeLinecap="round"
@@ -45,12 +52,16 @@ export function CountdownRing({ seconds, totalSeconds, paused, size = 176 }: Cou
       <div className="absolute flex flex-col items-center">
         <span
           className={`font-display text-4xl font-bold tabular-nums ${
-            urgent ? 'text-coral animate-pulseSlow' : 'text-white'
+            urgent ? "text-coral animate-pulseSlow" : "text-ink-900"
           }`}
         >
           {seconds}
         </span>
-        {paused && <span className="mt-0.5 text-[11px] font-medium text-sky">tạm dừng</span>}
+        {paused && (
+          <span className="mt-0.5 text-[11px] font-medium text-sky">
+            tạm dừng
+          </span>
+        )}
       </div>
     </div>
   );

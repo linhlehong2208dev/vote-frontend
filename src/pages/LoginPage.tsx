@@ -1,5 +1,7 @@
+// src/pages/LoginPage.tsx
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { LoadingSpinner } from "../components/LoadingSpinner";
 
 export function LoginPage() {
   const { signInWithGoogle } = useAuth();
@@ -20,12 +22,12 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
+    <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12 animate-pageIn">
       <div className="w-full max-w-sm text-center">
-        <h1 className="font-display text-3xl font-bold text-white">
+        <h1 className="font-display text-3xl font-bold text-ink-900">
           Bình chọn văn nghệ
         </h1>
-        <p className="mt-2 text-sm text-white/60">
+        <p className="mt-2 text-sm text-ink-500">
           Đăng nhập bằng tài khoản Google công ty để tham gia bình chọn.
         </p>
 
@@ -33,12 +35,18 @@ export function LoginPage() {
           type="button"
           onClick={handleGoogleLogin}
           disabled={busy}
-          className="mt-8 flex w-full items-center justify-center gap-3 rounded-xl bg-white py-3
-            font-display font-semibold text-stage-900 shadow-tile transition-all
+          className="mt-8 flex w-full items-center justify-center gap-3 rounded-xl border-2 border-stage-700 bg-white py-3
+            font-display font-semibold text-ink-900 shadow-tile transition-all
             active:translate-y-1 active:shadow-tile-active disabled:opacity-50"
         >
-          <GoogleIcon />
-          {busy ? "Đang chuyển hướng..." : "Đăng nhập bằng Google"}
+          {busy ? (
+            <LoadingSpinner variant="dots" size="sm" />
+          ) : (
+            <>
+              <GoogleIcon />
+              Đăng nhập bằng Google
+            </>
+          )}
         </button>
 
         {errorMsg && <p className="mt-4 text-sm text-coral">{errorMsg}</p>}
