@@ -19,6 +19,7 @@ export function GamePresentPage({
   const [count, setCount] = useState(0);
   const [participants, setParticipants] = useState<GameParticipant[]>([]);
   const [now, setNow] = useState(Date.now());
+  const [clockOffset, setClockOffset] = useState(0);
   const [advancing, setAdvancing] = useState(false);
   const [finalResults, setFinalResults] = useState<GamePublicResults | null>(
     null,
@@ -27,10 +28,11 @@ export function GamePresentPage({
     game.questions?.find((q) => q.id === game.current_session_id) ??
     game.questions?.[0];
   const joinUrl = `${window.location.origin}/game/${game.pin}`;
+  const syncedNow = now + clockOffset;
   const seconds = current?.ended_at
     ? Math.max(
         0,
-        Math.ceil((new Date(current.ended_at).getTime() - now) / 1000),
+        Math.ceil((new Date(current.ended_at).getTime() - syncedNow) / 1000),
       )
     : 0;
   const timeUp = Boolean(
@@ -79,6 +81,11 @@ export function GamePresentPage({
     const t = setInterval(() => setNow(Date.now()), 250);
     return () => clearInterval(t);
   }, []);
+  useEffect(() => {
+    if (game.server_now) {
+      setClockOffset(new Date(game.server_now).getTime() - Date.now());
+    }
+  }, [game.server_now]);
   useEffect(() => {
     void loadParticipants();
     const t = setInterval(() => void loadParticipants(), 1500);

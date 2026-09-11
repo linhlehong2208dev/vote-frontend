@@ -84,6 +84,8 @@ export interface GameInfo {
   current_session_id: string | null;
   created_at: string;
   updated_at?: string;
+  /** Server clock snapshot used to keep countdowns synchronized across devices. */
+  server_now?: string;
   questions?: GameQuestion[];
 }
 
