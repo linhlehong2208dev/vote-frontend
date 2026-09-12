@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { api, type GameDashboard, type GameInfo } from "../lib/api";
 
 function fmtTime(value: string | null | undefined) {
-  if (!value) return "â€”";
+  if (!value) return "—";
   return new Date(value).toLocaleString("vi-VN", {
     hour: "2-digit",
     minute: "2-digit",
@@ -34,7 +34,7 @@ function BarChart({
             />
           </div>
           <span className="w-full truncate text-center text-xs font-bold text-ink-500">
-            {String.fromCharCode(65 + i)} Â· {item.label}
+            {String.fromCharCode(65 + i)} · {item.label}
           </span>
         </div>
       ))}
@@ -68,7 +68,7 @@ export function GameManagementPage({
       setDashboard(d);
       setError("");
     } catch (err: any) {
-      setError(err?.message ?? "KhÃ´ng thá»ƒ táº£i Dashboard.");
+      setError(err?.message ?? "Không thể tải Dashboard.");
       try {
         setGame((await api.getGame(gameId)).game);
       } catch {}
@@ -84,7 +84,7 @@ export function GameManagementPage({
   if (!game)
     return (
       <div className="grid min-h-screen place-items-center bg-stage-950 text-ink-900">
-        Äang táº£i Gameâ€¦
+        Đang tải Game…
       </div>
     );
 
@@ -103,7 +103,7 @@ export function GameManagementPage({
       <header className="sticky top-0 z-20 border-b border-stage-700 bg-stage-950/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
           <button onClick={onBack} className="text-sm font-bold text-ink-900/45">
-            â† My Games
+            ← My Games
           </button>
           <div className="min-w-0 flex-1 px-4 text-center">
             <p className="truncate font-display text-lg font-black">
@@ -119,14 +119,14 @@ export function GameManagementPage({
               disabled={game.status === "active" || game.status === "closed"}
               className="rounded-xl bg-white/8 px-4 py-2.5 text-sm font-bold disabled:opacity-30"
             >
-              Chá»‰nh sá»­a
+              Chỉnh sửa
             </button>
             <button
               onClick={() => void action()}
               disabled={busy || !game.questions?.length}
               className="rounded-xl bg-amber px-4 py-2.5 text-sm font-black text-stage-950 disabled:opacity-40"
             >
-              {busy ? "Äang má»Ÿâ€¦" : "Má»Ÿ Lobby â†’"}
+              {busy ? "Đang mở…" : "Mở Lobby →"}
             </button>
           </div>
         </div>
@@ -141,11 +141,11 @@ export function GameManagementPage({
 
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            ["NGÆ¯á»œI THAM GIA", dashboard?.participantCount ?? 0],
-            ["Tá»”NG LÆ¯á»¢T VOTE", dashboard?.totalVotes ?? 0],
-            ["Sá» CÃ‚U Há»ŽI", game.questions?.length ?? 0],
+            ["NGƯỜI THAM GIA", dashboard?.participantCount ?? 0],
+            ["TỔNG LƯỢT VOTE", dashboard?.totalVotes ?? 0],
+            ["SỐ CÂU HỎI", game.questions?.length ?? 0],
             [
-              "TRáº NG THÃI",
+              "TRẠNG THÁI",
               game.status === "active" ? "LIVE" : game.status.toUpperCase(),
             ],
           ].map(([label, value]) => (
@@ -171,14 +171,14 @@ export function GameManagementPage({
                   RANKING
                 </p>
                 <h2 className="mt-1 font-display text-2xl font-black">
-                  Káº¿t quáº£ tá»«ng cÃ¢u
+                  Kết quả từng câu
                 </h2>
               </div>
               <button
                 onClick={() => void load()}
                 className="text-xs font-bold text-ink-500"
               >
-                â†» LÃ m má»›i
+                ↻ Làm mới
               </button>
             </div>
             <div className="mt-5 space-y-5">
@@ -190,7 +190,7 @@ export function GameManagementPage({
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-xs font-extrabold text-amber">
-                        CÃ‚U {q.number}
+                        CÂU {q.number}
                       </p>
                       <h3 className="mt-1 font-display font-bold">
                         {q.question}
@@ -198,19 +198,19 @@ export function GameManagementPage({
                     </div>
                     <div className="text-right text-xs text-ink-500">
                       <p>{q.totalVotes} vote</p>
-                      <p>{q.noAnswerCount} chÆ°a tráº£ lá»i</p>
+                      <p>{q.noAnswerCount} chưa trả lời</p>
                     </div>
                   </div>
                   <BarChart ranking={q.ranking} />
                   <p className="mt-3 text-xs text-ink-900/30">
-                    Báº¯t Ä‘áº§u: {fmtTime(q.startedAt)} Â· Káº¿t thÃºc:{" "}
+                    Bắt đầu: {fmtTime(q.startedAt)} · Kết thúc:{" "}
                     {fmtTime(q.endedAt)}
                   </p>
                 </article>
               ))}
               {!questions.length && (
                 <div className="rounded-2xl border border-dashed border-stage-700 p-10 text-center text-sm text-ink-300">
-                  ChÆ°a cÃ³ dá»¯ liá»‡u vote. Dashboard sáº½ cáº­p nháº­t khi ngÆ°á»i chÆ¡i
+                  Chưa có dữ liệu vote. Dashboard sẽ cập nhật khi người chơi
                   tham gia.
                 </div>
               )}
@@ -223,10 +223,10 @@ export function GameManagementPage({
                 PARTICIPANTS
               </p>
               <h2 className="mt-1 font-display text-2xl font-black">
-                NgÆ°á»i tham gia
+                Người tham gia
               </h2>
               <p className="mt-1 text-sm text-ink-300">
-                {dashboard?.participantCount ?? 0} ngÆ°á»i
+                {dashboard?.participantCount ?? 0} người
               </p>
               <div className="mt-5 max-h-80 space-y-3 overflow-auto">
                 {(dashboard?.participants ?? []).map((p, i) => (
@@ -249,7 +249,7 @@ export function GameManagementPage({
                 ))}
                 {!dashboard?.participants?.length && (
                   <p className="py-8 text-center text-sm text-ink-900/30">
-                    ChÆ°a cÃ³ ngÆ°á»i tham gia.
+                    Chưa có người tham gia.
                   </p>
                 )}
               </div>
@@ -260,7 +260,7 @@ export function GameManagementPage({
                 VOTE HISTORY
               </p>
               <h2 className="mt-1 font-display text-2xl font-black">
-                Lá»‹ch sá»­ bÃ¬nh chá»n
+                Lịch sử bình chọn
               </h2>
               <div className="mt-5 max-h-96 space-y-2 overflow-auto">
                 {(dashboard?.voteHistory ?? []).map((v, i) => (
@@ -275,13 +275,13 @@ export function GameManagementPage({
                       </span>
                     </div>
                     <p className="mt-1 text-xs text-ink-500">
-                      CÃ¢u {v.questionNumber} Â· {v.label ?? "KhÃ´ng tráº£ lá»i"}
+                      Câu {v.questionNumber} · {v.label ?? "Không trả lời"}
                     </p>
                   </div>
                 ))}
                 {!dashboard?.voteHistory?.length && (
                   <p className="py-8 text-center text-sm text-ink-900/30">
-                    ChÆ°a cÃ³ lÆ°á»£t vote.
+                    Chưa có lượt vote.
                   </p>
                 )}
               </div>

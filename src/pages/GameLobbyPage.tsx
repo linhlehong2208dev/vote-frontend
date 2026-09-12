@@ -76,7 +76,7 @@ export function GameLobbyPage({
   }, [game.status, isAdmin, onStart]);
 
   const join = async () => {
-    if (!name.trim()) return setError("HÃ£y nháº­p tÃªn cá»§a báº¡n.");
+    if (!name.trim()) return setError("Hãy nhập tên của bạn.");
     setJoining(true);
     setError("");
     try {
@@ -88,7 +88,7 @@ export function GameLobbyPage({
       setJoined(true);
       await loadCount();
     } catch (err: any) {
-      setError(err?.message ?? "KhÃ´ng thá»ƒ tham gia Game.");
+      setError(err?.message ?? "Không thể tham gia Game.");
     } finally {
       setJoining(false);
     }
@@ -122,7 +122,7 @@ export function GameLobbyPage({
           onClick={onBack}
           className="rounded-xl px-3 py-2 text-sm font-bold text-ink-900/45 hover:bg-white/5 hover:text-ink-900"
         >
-          â† Trang chá»§
+          ← Trang chủ
         </button>
         <div className="text-right">
           <p className="text-[10px] font-extrabold uppercase tracking-[.25em] text-amber">
@@ -151,16 +151,16 @@ export function GameLobbyPage({
             {game.title}
           </h1>
           <p className="mt-5 max-w-xl text-sm leading-6 text-ink-900/45 md:text-base">
-            Tham gia báº±ng QR hoáº·c nháº­p Game PIN. Báº¡n chá»‰ cáº§n vÃ o má»™t láº§n â€” host
-            sáº½ Ä‘Æ°a báº¡n Ä‘i qua toÃ n bá»™ cÃ¢u há»i.
+            Tham gia bằng QR hoặc nhập Game PIN. Bạn chỉ cần vào một lần — host
+            sẽ đưa bạn đi qua toàn bộ câu hỏi.
           </p>
           <div className="mt-8 flex items-center justify-center gap-3 md:justify-start">
             <div className="rounded-2xl bg-white/7 px-5 py-4">
-              <p className="text-xs font-bold text-ink-300">NGÆ¯á»œI CHÆ I</p>
+              <p className="text-xs font-bold text-ink-300">NGƯỜI CHƠI</p>
               <p className="mt-1 font-display text-3xl font-black">{count}</p>
             </div>
             <div className="rounded-2xl bg-white/7 px-5 py-4">
-              <p className="text-xs font-bold text-ink-300">CÃ‚U Há»ŽI</p>
+              <p className="text-xs font-bold text-ink-300">CÂU HỎI</p>
               <p className="mt-1 font-display text-3xl font-black">
                 {game.questions?.length ?? 0}
               </p>
@@ -172,10 +172,10 @@ export function GameLobbyPage({
           {!isAdmin && !alreadyJoined ? (
             <>
               <p className="text-center text-xs font-extrabold uppercase tracking-[.18em] text-ink-500">
-                Sáº´N SÃ€NG?
+                SẴN SÀNG?
               </p>
               <h2 className="mt-2 text-center font-display text-2xl font-black">
-                Nháº­p tÃªn hiá»ƒn thá»‹
+                Nhập tên hiển thị
               </h2>
               <input
                 autoFocus
@@ -185,7 +185,7 @@ export function GameLobbyPage({
                   if (e.key === "Enter") void join();
                 }}
                 maxLength={80}
-                placeholder="VÃ­ dá»¥: LÄ©nh"
+                placeholder="Ví dụ: Lĩnh"
                 className="mt-6 field-input text-center text-lg font-bold"
               />
               {error && (
@@ -198,25 +198,25 @@ export function GameLobbyPage({
                 onClick={() => void join()}
                 className="mt-4 w-full rounded-2xl bg-amber py-4 font-display text-base font-black text-stage-950 shadow-tile transition hover:-translate-y-0.5 disabled:opacity-50"
               >
-                {joining ? "Äang tham giaâ€¦" : "Tham gia Game â†’"}
+                {joining ? "Đang tham gia…" : "Tham gia Game →"}
               </button>
             </>
           ) : (
             <>
               <div className="flex flex-col items-center text-center">
                 <div className="grid h-16 w-16 place-items-center rounded-3xl bg-emerald/15 text-3xl">
-                  âœ“
+                  ✓
                 </div>
                 <p className="mt-5 text-xs font-extrabold uppercase tracking-[.18em] text-emerald">
-                  ÄÃƒ THAM GIA
+                  ĐÃ THAM GIA
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-black">
-                  {isAdmin ? "Lobby cá»§a Host" : `Xin chÃ o, ${name}`}
+                  {isAdmin ? "Lobby của Host" : `Xin chào, ${name}`}
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-ink-500">
                   {isAdmin
-                    ? "Má»Ÿ mÃ n hÃ¬nh nÃ y trÃªn TV / mÃ¡y chiáº¿u Ä‘á»ƒ hiá»ƒn thá»‹ Game PIN vÃ  QR."
-                    : "HÃ£y chá» Host báº¯t Ä‘áº§u. Báº¡n khÃ´ng cáº§n quÃ©t QR láº¡i."}
+                    ? "Mở màn hình này trên TV / máy chiếu để hiển thị Game PIN và QR."
+                    : "Hãy chờ Host bắt đầu. Bạn không cần quét QR lại."}
                 </p>
                 {!isAdmin && (
                   <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald/20 bg-emerald/10 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[.18em] text-emerald shadow-[0_0_20px_rgba(16,185,129,0.18)]">
@@ -225,7 +225,7 @@ export function GameLobbyPage({
                       <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald [animation-delay:200ms]" />
                       <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald [animation-delay:400ms]" />
                     </span>
-                    Äang chá» Host
+                    Đang chờ Host
                   </div>
                 )}
               </div>
@@ -243,7 +243,7 @@ export function GameLobbyPage({
                     {game.pin}
                   </p>
                   <p className="mt-2 text-xs text-ink-900/30">
-                    QuÃ©t QR hoáº·c vÃ o {window.location.host}/game/{game.pin}
+                    Quét QR hoặc vào {window.location.host}/game/{game.pin}
                   </p>
                 </div>
               )}
@@ -253,14 +253,14 @@ export function GameLobbyPage({
                     className={`mt-5 rounded-2xl border p-3 text-center transition-all ${participantsConfirmed ? "border-emerald/30 bg-emerald/10 shadow-[0_0_24px_rgba(16,185,129,0.22)]" : "border-stage-700 bg-black/20"}`}
                   >
                     <p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-ink-300">
-                      TÃŒNH TRáº NG THAM GIA
+                      TÌNH TRẠNG THAM GIA
                     </p>
                     <p
                       className={`mt-1 text-sm font-bold ${participantsConfirmed ? "text-emerald" : "text-ink-700"}`}
                     >
                       {participantsConfirmed
-                        ? `Sáºµn sÃ ng báº¯t Ä‘áº§u â€¢ Ä‘Ã£ xÃ¡c nháº­n ${count} ngÆ°á»i chÆ¡i.`
-                        : "Äang chá» ngÆ°á»i chÆ¡i tham gia..."}
+                        ? `Sẵn sàng bắt đầu • đã xác nhận ${count} người chơi.`
+                        : "Đang chờ người chơi tham gia..."}
                     </p>
                   </div>
                   <button
@@ -273,10 +273,10 @@ export function GameLobbyPage({
                     className="mt-5 w-full rounded-2xl bg-amber py-4 font-display font-black text-stage-950 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     {starting
-                      ? "Äang báº¯t Ä‘áº§uâ€¦"
+                      ? "Đang bắt đầu…"
                       : participantsConfirmed
-                        ? "Báº¯t Ä‘áº§u Game â†’"
-                        : "Äang chá» ngÆ°á»i chÆ¡iâ€¦"}
+                        ? "Bắt đầu Game →"
+                        : "Đang chờ người chơi…"}
                   </button>
                 </>
               )}

@@ -100,7 +100,7 @@ export default function App() {
           })
           .catch((err) => {
             if (!cancelled)
-              setJoinError(err.message ?? "MÃ£ phÃ²ng khÃ´ng há»£p lá»‡.");
+              setJoinError(err.message ?? "Mã phòng không hợp lệ.");
           })
           .finally(() => {
             if (!cancelled) setJoinResolving(false);
@@ -133,7 +133,7 @@ export default function App() {
         if (!cancelled) setGame(full.game);
       })
       .catch((err) => {
-        if (!cancelled) setGameError(err.message ?? "KhÃ´ng tÃ¬m tháº¥y Game.");
+        if (!cancelled) setGameError(err.message ?? "Không tìm thấy Game.");
       })
       .finally(() => {
         if (!cancelled) setGameLoading(false);
@@ -153,14 +153,14 @@ export default function App() {
     window.dispatchEvent(new PopStateEvent("popstate"));
   };
 
-  if (loading) return <FullScreenMessage text="Äang táº£iâ€¦" />;
+  if (loading) return <FullScreenMessage text="Đang tải…" />;
   if (!session) return <LoginPage />;
 
   if (gamePin) {
     if (gameLoading)
-      return <FullScreenMessage text={`Äang má»Ÿ Game ${gamePin}â€¦`} />;
+      return <FullScreenMessage text={`Đang mở Game ${gamePin}…`} />;
     if (gameError || !game)
-      return <FullScreenMessage text={gameError || "KhÃ´ng tÃ¬m tháº¥y Game."} />;
+      return <FullScreenMessage text={gameError || "Không tìm thấy Game."} />;
     if (isAdmin && path.endsWith("/present"))
       return (
         <GamePresentPage
@@ -196,9 +196,9 @@ export default function App() {
     urlSessionId ?? resolvedJoinSessionId ?? (manualSessionId.trim() || null);
   if (joinCode && !sessionId)
     return joinResolving ? (
-      <FullScreenMessage text={`Äang má»Ÿ phÃ²ng ${joinCode}â€¦`} />
+      <FullScreenMessage text={`Đang mở phòng ${joinCode}…`} />
     ) : (
-      <FullScreenMessage text={joinError ?? "KhÃ´ng tÃ¬m tháº¥y phÃ²ng."} />
+      <FullScreenMessage text={joinError ?? "Không tìm thấy phòng."} />
     );
 
   if (isAdmin && !sessionId) {
@@ -219,7 +219,7 @@ export default function App() {
       const parts = path.split("/").filter(Boolean);
       const id = parts[2] ?? "";
       if (path.endsWith("/present"))
-        return <FullScreenMessage text="Äang má»Ÿ Presentationâ€¦" />;
+        return <FullScreenMessage text="Đang mở Presentation…" />;
       if (path.endsWith("/edit"))
         return (
           <GameBuilderPage
@@ -279,17 +279,17 @@ function PublicRanking({ result }: { result: GamePublicResults }) {
       <main className="mx-auto max-w-6xl">
         <div className="text-center">
           <p className="text-xs font-extrabold uppercase tracking-[.3em] text-amber">
-            Káº¾T QUáº¢ GAME
+            KẾT QUẢ GAME
           </p>
           <h1 className="mt-3 font-display text-4xl font-black md:text-6xl">
             {result.game.title}
           </h1>
           <div className="mt-5 flex flex-wrap justify-center gap-3 text-sm font-bold text-ink-900/45">
             <span className="rounded-full bg-white/8 px-4 py-2">
-              {result.participantCount} ngÆ°á»i chÆ¡i
+              {result.participantCount} người chơi
             </span>
             <span className="rounded-full bg-white/8 px-4 py-2">
-              {result.totalVotes} lÆ°á»£t vote
+              {result.totalVotes} lượt vote
             </span>
           </div>
         </div>
@@ -302,7 +302,7 @@ function PublicRanking({ result }: { result: GamePublicResults }) {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-xs font-extrabold uppercase tracking-[.18em] text-amber">
-                    CÃ‚U {q.questionNumber}
+                    CÂU {q.questionNumber}
                   </p>
                   <h2 className="mt-2 font-display text-xl font-black md:text-2xl">
                     {q.question}
@@ -310,7 +310,7 @@ function PublicRanking({ result }: { result: GamePublicResults }) {
                 </div>
                 <div className="shrink-0 text-right text-xs font-bold text-ink-500">
                   <p>{q.totalVotes} vote</p>
-                  <p>{q.noAnswerCount} chÆ°a tráº£ lá»i</p>
+                  <p>{q.noAnswerCount} chưa trả lời</p>
                 </div>
               </div>
               <div className="mt-7 flex min-h-[260px] items-end gap-3 overflow-x-auto border-t border-stage-700 pt-5">
@@ -331,7 +331,7 @@ function PublicRanking({ result }: { result: GamePublicResults }) {
                       />
                     </div>
                     <span className="w-full truncate text-center text-xs font-bold text-ink-500">
-                      {String.fromCharCode(65 + i)} Â· {item.label}
+                      {String.fromCharCode(65 + i)} · {item.label}
                     </span>
                   </div>
                 ))}
@@ -378,13 +378,13 @@ function GamePlayerActive({
   useEffect(() => {
     setSelected(null);
   }, [current?.id]);
-  if (!current) return <FullScreenMessage text="Äang chá» cÃ¢u há»iâ€¦" />;
+  if (!current) return <FullScreenMessage text="Đang chờ câu hỏi…" />;
   if (!joined)
     return (
       <div className="grid min-h-screen place-items-center bg-stage-950 px-5 text-ink-900">
         <div className="w-full max-w-sm rounded-[28px] border border-stage-700 bg-white/[.05] p-6 text-center">
           <p className="text-xs font-extrabold uppercase tracking-[.2em] text-amber">
-            GAME ÄANG DIá»„N RA
+            GAME ĐANG DIỄN RA
           </p>
           <h1 className="mt-3 font-display text-2xl font-black">
             Tham gia ngay
@@ -395,7 +395,7 @@ function GamePlayerActive({
               setDisplayName(e.target.value);
               setJoinError("");
             }}
-            placeholder="TÃªn hiá»ƒn thá»‹"
+            placeholder="Tên hiển thị"
             className="field-input mt-5 text-center"
           />
           {joinError && (
@@ -414,14 +414,14 @@ function GamePlayerActive({
                 );
                 setJoined(true);
               } catch (e: any) {
-                setJoinError(e?.message ?? "KhÃ´ng thá»ƒ tham gia Game.");
+                setJoinError(e?.message ?? "Không thể tham gia Game.");
               } finally {
                 setBusy(false);
               }
             }}
             className="mt-3 w-full rounded-2xl bg-amber py-4 font-black text-stage-950 disabled:opacity-40"
           >
-            {busy ? "Äang tham giaâ€¦" : "Tham gia â†’"}
+            {busy ? "Đang tham gia…" : "Tham gia →"}
           </button>
         </div>
       </div>
@@ -451,7 +451,7 @@ function GamePlayerActive({
       <div className="mx-auto max-w-3xl">
         <div className="flex items-center justify-between">
           <span className="rounded-full bg-white/8 px-3 py-2 text-xs font-extrabold">
-            CÃ‚U {current.sort_order}/{game.questions?.length}
+            CÂU {current.sort_order}/{game.questions?.length}
           </span>
           <span
             className={`font-mono text-2xl font-black ${!timeUp && seconds <= 5 ? "text-coral animate-pulse" : "text-amber"}`}
@@ -482,13 +482,13 @@ function GamePlayerActive({
         <div className="mt-6 text-center">
           {timeUp ? (
             <p className="font-black text-amber">
-              Háº¿t giá» â€” chá» ngÆ°á»i dáº«n chuyá»ƒn sang cÃ¢u tiáº¿p theo.
+              Hết giờ — chờ người dẫn chuyển sang câu tiếp theo.
             </p>
           ) : (
             <p className="text-xs font-semibold text-ink-900/30">
               {selected
-                ? "ÄÃ£ ghi nháº­n lá»±a chá»n. Báº¡n cÃ³ thá»ƒ Ä‘á»•i Ä‘Ã¡p Ã¡n."
-                : "Chá»n má»™t Ä‘Ã¡p Ã¡n"}
+                ? "Đã ghi nhận lựa chọn. Bạn có thể đổi đáp án."
+                : "Chọn một đáp án"}
             </p>
           )}
         </div>
@@ -504,19 +504,19 @@ function GameClosedPage({ game }: { game: GameInfo }) {
     api
       .getGamePublicResults(game.id)
       .then(setResult)
-      .catch((e) => setError(e?.message ?? "KhÃ´ng thá»ƒ táº£i káº¿t quáº£."));
+      .catch((e) => setError(e?.message ?? "Không thể tải kết quả."));
   }, [game.id]);
   if (result) return <PublicRanking result={result} />;
   return (
     <div className="grid min-h-screen place-items-center bg-stage-950 px-6 text-center text-ink-900">
       <div>
         <div className="mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-white/8 text-4xl">
-          âœ“
+          ✓
         </div>
         <h1 className="mt-6 font-display text-4xl font-black">
-          Game Ä‘Ã£ káº¿t thÃºc
+          Game đã kết thúc
         </h1>
-        <p className="mt-3 text-ink-500">{error || "Äang táº£i káº¿t quáº£â€¦"}</p>
+        <p className="mt-3 text-ink-500">{error || "Đang tải kết quả…"}</p>
         <p className="mt-6 font-mono text-sm tracking-widest text-amber">
           {game.pin}
         </p>
@@ -534,10 +534,10 @@ function SessionIdGate({ onSubmit }: { onSubmit: (id: string) => void }) {
       </div>
       <div>
         <p className="font-display text-lg font-semibold text-ink-900">
-          Nháº­p mÃ£ phÃ²ng
+          Nhập mã phòng
         </p>
         <p className="mt-2 max-w-xs text-sm text-ink-500">
-          MÃ£ cÅ© cá»§a V1 váº«n Ä‘Æ°á»£c há»— trá»£.
+          Mã cũ của V1 vẫn được hỗ trợ.
         </p>
       </div>
       <form
@@ -550,11 +550,11 @@ function SessionIdGate({ onSubmit }: { onSubmit: (id: string) => void }) {
         <input
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          placeholder="Game PIN / mÃ£ cÅ©"
+          placeholder="Game PIN / mã cũ"
           className="field-input"
         />
         <button className="rounded-xl bg-amber py-3 font-display font-semibold text-stage-900">
-          VÃ o phÃ²ng
+          Vào phòng
         </button>
       </form>
     </div>
