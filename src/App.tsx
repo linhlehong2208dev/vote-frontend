@@ -33,9 +33,8 @@ export default function App() {
   const [manualSessionId, setManualSessionId] = useState("");
   const [manualJoinCode, setManualJoinCode] = useState<string | null>(null);
   const [manualGamePin, setManualGamePin] = useState<string | null>(null);
-  const [resolvedJoinSessionId, setResolvedJoinSessionId] = useState<
-    string | null
-  >(null);
+  const [resolvedJoinSessionId, setResolvedJoinSessionId] = useState;
+  string | (null > null);
   const [joinResolving, setJoinResolving] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
   const [adminView, setAdminView] = useState<AdminView>("list");
@@ -362,6 +361,10 @@ function GamePlayerActive({
 }) {
   const current = game.questions?.find((q) => q.id === game.current_session_id);
   const [now, setNow] = useState(Date.now());
+  // Độ lệch giữa đồng hồ server và đồng hồ client, tính lại mỗi khi `game`
+  // (kèm `server_now`) được refetch. Countdown luôn tick theo đồng hồ client
+  // (mỗi giây) + offset này, thay vì đứng im theo server_now cũ giữa 2 lần poll.
+  const [serverOffset, setServerOffset] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [joined, setJoined] = useState(
@@ -369,6 +372,13 @@ function GamePlayerActive({
   );
   const [displayName, setDisplayName] = useState("");
   const [joinError, setJoinError] = useState("");
+
+  useEffect(() => {
+    if (game.server_now) {
+      setServerOffset(new Date(game.server_now).getTime() - Date.now());
+    }
+  }, [game.server_now]);
+
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
@@ -435,7 +445,7 @@ function GamePlayerActive({
         </div>
       </div>
     );
-  const serverNow = game.server_now ? new Date(game.server_now).getTime() : now;
+  const serverNow = now + serverOffset;
   const seconds = current.ended_at
     ? Math.max(
         0,
