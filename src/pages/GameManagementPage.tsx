@@ -252,9 +252,14 @@ export function GameManagementPage({
                       <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/10 text-xs font-black text-ink-700">
                         {i + 1}
                       </span>
-                      <span className="truncate font-bold">
-                        {p.display_name}
-                      </span>
+                      <div className="min-w-0">
+                        <div className="truncate font-bold">
+                          {p.display_name}
+                        </div>
+                        <div className="truncate text-[10px] text-ink-900/35">
+                          {p.email ?? "Không có email"}
+                        </div>
+                      </div>
                     </div>
                     <span className="shrink-0 text-[11px] text-ink-900/30">
                       {fmtTime(p.joined_at)}
@@ -283,15 +288,22 @@ export function GameManagementPage({
                     className="rounded-2xl bg-white/5 px-4 py-3"
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <span className="font-bold">{v.displayName}</span>
+                      <div className="min-w-0">
+                        <div className="truncate font-bold">
+                          {v.displayName}
+                        </div>
+                        <div className="truncate text-[10px] text-ink-900/35">
+                          {v.email ?? "Không có email"}
+                        </div>
+                      </div>
                       <span className="text-[11px] text-ink-900/30">
                         {fmtTime(v.timestamp)}
                       </span>
                     </div>
                     <p className="mt-1 text-xs text-ink-500">
-                      Câu {v.questionNumber} · {v.displayName}{" "}
+                      Câu {v.questionNumber} ·{" "}
                       {v.optionId
-                        ? `vote ${v.label ?? "một đáp án"}`
+                        ? `đã vote ${v.label ?? "một đáp án"}`
                         : "chưa trả lời"}
                     </p>
                   </div>

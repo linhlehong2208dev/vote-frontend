@@ -69,6 +69,7 @@ export interface GameParticipant {
   id: string;
   user_id: string;
   display_name: string;
+  email?: string | null;
   joined_at: string;
   last_seen_at?: string | null;
 }
@@ -152,6 +153,7 @@ export interface GameDashboard {
     questionId: string;
     questionNumber: number;
     displayName: string;
+    email?: string | null;
     userId: string;
     optionId: string | null;
     label?: string | null;
