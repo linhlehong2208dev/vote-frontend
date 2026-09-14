@@ -40,7 +40,7 @@ export function GameBuilderPage({
   const [backgroundType, setBackgroundType] =
     useState<GameBackgroundType>("gradient");
   const [backgroundValue, setBackgroundValue] = useState(
-    "linear-gradient(135deg,#6C2BD9,#2D7FF9)",
+    "linear-gradient(135deg, #F7D9DD 0%, #E95B6D 42%, #D81F3E 100%)",
   );
   const [questions, setQuestions] = useState<DraftQuestion[]>([
     defaultQuestion(1),
@@ -83,7 +83,9 @@ export function GameBuilderPage({
     );
   const previewStyle = useMemo(
     () => ({
-      background: backgroundValue || "linear-gradient(135deg,#6C2BD9,#2D7FF9)",
+      background:
+        backgroundValue ||
+        "linear-gradient(135deg, #F7D9DD 0%, #E95B6D 42%, #D81F3E 100%)",
     }),
     [backgroundValue],
   );
