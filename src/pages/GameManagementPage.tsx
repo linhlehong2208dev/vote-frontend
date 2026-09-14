@@ -102,7 +102,10 @@ export function GameManagementPage({
     <div className="min-h-screen bg-stage-950 text-ink-900">
       <header className="sticky top-0 z-20 border-b border-stage-700 bg-stage-950/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
-          <button onClick={onBack} className="text-sm font-bold text-ink-900/45">
+          <button
+            onClick={onBack}
+            className="text-sm font-bold text-ink-900/45"
+          >
             ← My Games
           </button>
           <div className="min-w-0 flex-1 px-4 text-center">
@@ -275,7 +278,8 @@ export function GameManagementPage({
                       </span>
                     </div>
                     <p className="mt-1 text-xs text-ink-500">
-                      Câu {v.questionNumber} · {v.label ?? "Không trả lời"}
+                      Câu {v.questionNumber} ·{" "}
+                      {v.label ?? (v.optionId ? "Đã trả lời" : "Không trả lời")}
                     </p>
                   </div>
                 ))}
@@ -292,4 +296,3 @@ export function GameManagementPage({
     </div>
   );
 }
-
