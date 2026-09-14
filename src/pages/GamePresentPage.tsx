@@ -374,25 +374,25 @@ export function GamePresentPage({
       }}
     >
       <div className="min-h-screen bg-black/20 px-5 py-6 md:px-10 md:py-8">
-        <div className="flex items-center justify-between">
-          <div className="rounded-full bg-black/25 px-4 py-2 text-sm font-extrabold">
+        <div className="flex items-center justify-between text-white">
+          <div className="rounded-full bg-black/25 px-4 py-2 text-sm font-extrabold text-white">
             CÂU {current.sort_order} / {game.questions?.length}
           </div>
           <div
-            className={`grid h-20 w-20 place-items-center rounded-full border-4 font-mono text-3xl font-black ${seconds <= 5 && !timeUp ? "border-coral bg-coral/20 text-coral animate-pulse" : "border-stage-700 bg-black/20"}`}
+            className={`grid h-20 w-20 place-items-center rounded-full border-4 font-mono text-3xl font-black ${seconds <= 5 && !timeUp ? "border-white bg-white/10 text-white animate-pulse" : "border-white/40 bg-black/20 text-white"}`}
           >
             {timeUp ? 0 : seconds}
           </div>
-          <div className="rounded-full bg-black/25 px-4 py-2 text-sm font-extrabold">
+          <div className="rounded-full bg-black/25 px-4 py-2 text-sm font-extrabold text-white">
             {count} người chơi
           </div>
         </div>
         <main className="mx-auto flex min-h-[calc(100vh-130px)] max-w-7xl flex-col justify-center">
           <div className="mx-auto w-full max-w-5xl rounded-[32px] bg-black/20 p-6 text-center backdrop-blur-sm md:p-10">
-            <p className="text-sm font-extrabold uppercase tracking-[.25em] text-amber">
+            <p className="text-sm font-extrabold uppercase tracking-[.25em] text-white">
               QUESTION {current.sort_order}
             </p>
-            <h1 className="mt-5 font-display text-4xl font-black leading-tight md:text-6xl">
+            <h1 className="mt-5 font-display text-4xl font-black leading-tight text-white md:text-6xl">
               {current.question}
             </h1>
             {current.image_url && (
@@ -407,7 +407,7 @@ export function GamePresentPage({
             {current.options?.map((opt, i) => (
               <div
                 key={opt.id}
-                className="min-h-28 rounded-[24px] bg-white p-6 text-xl font-black text-stage-950 shadow-2xl md:text-2xl"
+                className="min-h-28 rounded-[24px] bg-white p-6 text-xl font-black text-[#E4002B] shadow-2xl md:text-2xl"
               >
                 {String.fromCharCode(65 + i)}. {opt.label}
               </div>
@@ -415,7 +415,7 @@ export function GamePresentPage({
           </div>
           {timeUp && (
             <div className="mt-8 flex flex-col items-center gap-4 rounded-[28px] bg-black/30 p-6 backdrop-blur-sm">
-              <p className="text-xl font-black">Hết giờ</p>
+              <p className="text-xl font-black text-white">Hết giờ</p>
               <button
                 disabled={advancing}
                 onClick={() => void handleNext()}
