@@ -39,9 +39,7 @@ export function GameBuilderPage({
   const [coverUrl, setCoverUrl] = useState("");
   const [backgroundType, setBackgroundType] =
     useState<GameBackgroundType>("gradient");
-  const [backgroundValue, setBackgroundValue] = useState(
-    "linear-gradient(135deg, #F7D9DD 0%, #E95B6D 42%, #D81F3E 100%)",
-  );
+  const [backgroundValue, setBackgroundValue] = useState("#E4002B");
   const [questions, setQuestions] = useState<DraftQuestion[]>([
     defaultQuestion(1),
   ]);
@@ -83,9 +81,7 @@ export function GameBuilderPage({
     );
   const previewStyle = useMemo(
     () => ({
-      background:
-        backgroundValue ||
-        "linear-gradient(135deg, #F7D9DD 0%, #E95B6D 42%, #D81F3E 100%)",
+      background: backgroundValue || "#E4002B",
     }),
     [backgroundValue],
   );
@@ -447,11 +443,8 @@ export function GameBuilderPage({
                     </span>
                   </div>
                   <div
-                    className="rounded-2xl px-4 py-3 shadow-lg"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, #F7D9DD 0%, #E95B6D 42%, #D81F3E 100%)",
-                    }}
+                    className="rounded-2xl bg-[#E4002B] px-4 py-3 shadow-lg"
+                    style={{ backgroundColor: "#E4002B" }}
                   >
                     <p className="font-display text-lg font-extrabold leading-6 text-white drop-shadow-md">
                       {current.question || "Câu hỏi của bạn sẽ hiện ở đây"}
