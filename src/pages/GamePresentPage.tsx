@@ -82,7 +82,7 @@ export function GamePresentPage({
   }, []);
   useEffect(() => {
     void loadParticipants();
-    const t = setInterval(() => void loadParticipants(), 4000);
+    const t = setInterval(() => void loadParticipants(), 8000);
     return () => clearInterval(t);
   }, [game.id]);
   useEffect(() => {
@@ -92,7 +92,7 @@ export function GamePresentPage({
           .getGame(game.id)
           .then((r) => onGameUpdate(r.game))
           .catch(() => {}),
-      3000,
+      10000,
     );
     return () => clearInterval(t);
   }, [game.id, onGameUpdate]);

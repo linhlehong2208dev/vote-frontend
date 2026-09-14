@@ -380,7 +380,7 @@ function GamePlayerActive({
           .getGame(game.id)
           .then((r) => onUpdate(r.game))
           .catch(() => {}),
-      3000,
+      10000,
     );
     return () => clearInterval(t);
   }, [game.id, onUpdate]);

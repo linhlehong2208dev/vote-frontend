@@ -208,6 +208,12 @@ function normalizeParticipant(participant: any): GameParticipant {
     user_id: participant.user_id ?? participant.userId ?? participant.id,
     display_name:
       participant.display_name ?? participant.displayName ?? "Người chơi",
+    email:
+      participant.email ??
+      participant.user_email ??
+      participant.userEmail ??
+      participant.email_address ??
+      null,
     joined_at:
       participant.joined_at ?? participant.joinedAt ?? new Date().toISOString(),
     last_seen_at: participant.last_seen_at ?? participant.lastSeenAt ?? null,

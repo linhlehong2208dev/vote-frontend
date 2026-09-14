@@ -79,7 +79,7 @@ export function GameManagementPage({
 
   useEffect(() => {
     void load();
-    const t = window.setInterval(() => void load(), 2500);
+    const t = window.setInterval(() => void load(), 10000);
     return () => window.clearInterval(t);
   }, [load]);
 
