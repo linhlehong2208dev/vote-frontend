@@ -18,11 +18,6 @@ export function GamePresentPage({
 }) {
   const [count, setCount] = useState(0);
   const [participants, setParticipants] = useState<GameParticipant[]>([]);
-  const [now, setNow] = useState(Date.now());
-  // Độ lệch giữa đồng hồ server và đồng hồ client, tính lại mỗi khi `game`
-  // (kèm `server_now`) được refetch. Countdown luôn tick theo đồng hồ client
-  // (mỗi giây) + offset này, thay vì đứng im theo server_now cũ giữa 2 lần poll.
-  const [serverOffset, setServerOffset] = useState(0);
   const [advancing, setAdvancing] = useState(false);
   const [finalResults, setFinalResults] = useState<GamePublicResults | null>(
     null,
@@ -32,19 +27,24 @@ export function GamePresentPage({
     game.questions?.[0];
   const joinUrl = `${window.location.origin}/game/${game.pin}`;
 
+  // Đếm ngược độc lập, chỉ phụ thuộc câu hỏi hiện tại (id + ended_at).
+  // Không phụ thuộc vào chu kỳ poll `game` mỗi 10s nên tick mượt từng giây,
+  // không bị "đứng hình" giữa 2 lần poll rồi nhảy cục.
+  const [seconds, setSeconds] = useState(0);
   useEffect(() => {
-    if (game.server_now) {
-      setServerOffset(new Date(game.server_now).getTime() - Date.now());
+    if (!current?.ended_at) {
+      setSeconds(0);
+      return;
     }
-  }, [game.server_now]);
+    const endedAtMs = new Date(current.ended_at).getTime();
+    const tick = () =>
+      setSeconds(Math.max(0, Math.ceil((endedAtMs - Date.now()) / 1000)));
 
-  const serverNow = now + serverOffset;
-  const seconds = current?.ended_at
-    ? Math.max(
-        0,
-        Math.ceil((new Date(current.ended_at).getTime() - serverNow) / 1000),
-      )
-    : 0;
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [current?.id, current?.ended_at]);
+
   const timeUp = Boolean(
     current && (current.status === "closed" || seconds <= 0),
   );
@@ -87,10 +87,6 @@ export function GamePresentPage({
     }
   };
 
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, []);
   useEffect(() => {
     void loadParticipants();
     const t = setInterval(() => void loadParticipants(), 8000);

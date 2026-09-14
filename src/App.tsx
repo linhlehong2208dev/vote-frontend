@@ -33,8 +33,9 @@ export default function App() {
   const [manualSessionId, setManualSessionId] = useState("");
   const [manualJoinCode, setManualJoinCode] = useState<string | null>(null);
   const [manualGamePin, setManualGamePin] = useState<string | null>(null);
-  const [resolvedJoinSessionId, setResolvedJoinSessionId] = useState;
-  string | (null > null);
+  const [resolvedJoinSessionId, setResolvedJoinSessionId] = useState<
+    string | null
+  >(null);
   const [joinResolving, setJoinResolving] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
   const [adminView, setAdminView] = useState<AdminView>("list");
@@ -360,11 +361,6 @@ function GamePlayerActive({
   onUpdate: (g: GameInfo) => void;
 }) {
   const current = game.questions?.find((q) => q.id === game.current_session_id);
-  const [now, setNow] = useState(Date.now());
-  // Độ lệch giữa đồng hồ server và đồng hồ client, tính lại mỗi khi `game`
-  // (kèm `server_now`) được refetch. Countdown luôn tick theo đồng hồ client
-  // (mỗi giây) + offset này, thay vì đứng im theo server_now cũ giữa 2 lần poll.
-  const [serverOffset, setServerOffset] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [joined, setJoined] = useState(
@@ -373,16 +369,23 @@ function GamePlayerActive({
   const [displayName, setDisplayName] = useState("");
   const [joinError, setJoinError] = useState("");
 
+  // Đếm ngược độc lập, chỉ phụ thuộc câu hỏi hiện tại (id + ended_at).
+  // Không phụ thuộc vào chu kỳ poll `game` mỗi 10s nên tick mượt từng giây.
+  const [seconds, setSeconds] = useState(0);
   useEffect(() => {
-    if (game.server_now) {
-      setServerOffset(new Date(game.server_now).getTime() - Date.now());
+    if (!current?.ended_at) {
+      setSeconds(0);
+      return;
     }
-  }, [game.server_now]);
+    const endedAtMs = new Date(current.ended_at).getTime();
+    const tick = () =>
+      setSeconds(Math.max(0, Math.ceil((endedAtMs - Date.now()) / 1000)));
 
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, []);
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [current?.id, current?.ended_at]);
+
   useEffect(() => {
     const t = setInterval(
       () =>
@@ -445,13 +448,6 @@ function GamePlayerActive({
         </div>
       </div>
     );
-  const serverNow = now + serverOffset;
-  const seconds = current.ended_at
-    ? Math.max(
-        0,
-        Math.ceil((new Date(current.ended_at).getTime() - serverNow) / 1000),
-      )
-    : 0;
   const timeUp = current.status === "closed" || seconds <= 0;
   const choose = async (id: string) => {
     if (busy || timeUp) return;
