@@ -32,6 +32,21 @@ export function AdminHomePage({
     }
   }, []);
 
+  const handleDelete = useCallback(
+    async (id: string) => {
+      const previous = games ?? [];
+      setGames((current) => (current ?? []).filter((game) => game.id !== id));
+      try {
+        await onDelete?.(id);
+        await load();
+      } catch (err: any) {
+        setGames(previous);
+        setError(err?.message ?? "Xóa Game thất bại.");
+      }
+    },
+    [games, load, onDelete],
+  );
+
   useEffect(() => {
     void load();
   }, [load]);
@@ -196,7 +211,7 @@ export function AdminHomePage({
                     onClick={(event) => {
                       event.stopPropagation();
                       if (!window.confirm("Xóa Game này?")) return;
-                      void onDelete?.(game.id);
+                      void handleDelete(game.id);
                     }}
                     className="shrink-0 rounded-xl border border-coral/40 bg-coral/10 px-2.5 py-2 text-[11px] font-extrabold text-coral transition hover:bg-coral hover:text-stage-950"
                   >
