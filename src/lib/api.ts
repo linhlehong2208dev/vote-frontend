@@ -349,6 +349,11 @@ export const api = {
       method: "POST",
     }),
 
+  deleteGame: (gameId: string) =>
+    request<{ ok: true }>(`/api/games/${gameId}`, {
+      method: "DELETE",
+    }),
+
   getGameDashboard: async (gameId: string) => {
     const result = await request<any>(`/api/games/${gameId}/dashboard`);
     return {

@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-import { api, type SessionInfo } from '../lib/api';
+import { useEffect, useRef, useState } from "react";
+import { api, type SessionInfo } from "../lib/api";
 
 const POLL_MS = 1500;
-const TICK_MS = 200;
+const TICK_MS = 1000;
 
 interface UseSessionStateResult {
   session: SessionInfo | null;
@@ -12,7 +12,9 @@ interface UseSessionStateResult {
   refresh: () => Promise<void>;
 }
 
-export function useSessionState(sessionId: string | null): UseSessionStateResult {
+export function useSessionState(
+  sessionId: string | null,
+): UseSessionStateResult {
   const [session, setSession] = useState<SessionInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [displaySeconds, setDisplaySeconds] = useState<number | null>(null);
@@ -26,7 +28,7 @@ export function useSessionState(sessionId: string | null): UseSessionStateResult
       setSession(info);
       setError(null);
     } catch (err: any) {
-      setError(err.message ?? 'Không tải được thông tin phiên bình chọn.');
+      setError(err.message ?? "Không tải được thông tin phiên bình chọn.");
     }
   }
 
@@ -45,12 +47,12 @@ export function useSessionState(sessionId: string | null): UseSessionStateResult
         setDisplaySeconds(null);
         return;
       }
-      if (s.status === 'active' && s.ended_at) {
+      if (s.status === "active" && s.ended_at) {
         const remainingMs = new Date(s.ended_at).getTime() - Date.now();
         setDisplaySeconds(Math.max(0, Math.ceil(remainingMs / 1000)));
-      } else if (s.status === 'paused' && s.remaining_seconds != null) {
+      } else if (s.status === "paused" && s.remaining_seconds != null) {
         setDisplaySeconds(s.remaining_seconds);
-      } else if (s.status === 'pending') {
+      } else if (s.status === "pending") {
         setDisplaySeconds(s.duration_seconds ?? null);
       } else {
         setDisplaySeconds(0);

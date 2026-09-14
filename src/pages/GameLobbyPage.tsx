@@ -47,14 +47,11 @@ export function GameLobbyPage({
 
   useEffect(() => {
     void loadCount();
-    const timer = window.setInterval(loadCount, 1500);
+    const timer = window.setInterval(loadCount, 4000);
     return () => window.clearInterval(timer);
   }, [loadCount]);
 
   useEffect(() => {
-    // Poll only for the lobby status transition. The previous implementation
-    // pushed a new Game object into App every second, which made the player
-    // lobby look like it was refreshing/re-entering the game.
     const timer = window.setInterval(async () => {
       try {
         const fresh = (await api.getGame(game.id)).game;
@@ -67,7 +64,7 @@ export function GameLobbyPage({
       } catch {
         /* transient */
       }
-    }, 1000);
+    }, 3000);
     return () => window.clearInterval(timer);
   }, [game.id, game.status, game.current_session_id, onGameUpdate]);
 
@@ -287,4 +284,3 @@ export function GameLobbyPage({
     </div>
   );
 }
-

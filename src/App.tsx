@@ -64,7 +64,7 @@ export default function App() {
     const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
     if (pendingPath !== current) {
       window.history.replaceState({}, "", pendingPath);
-      window.location.reload();
+      window.dispatchEvent(new PopStateEvent("popstate"));
     }
   }, [loading, session]);
 
@@ -237,6 +237,10 @@ export default function App() {
             navigate(`/game/${g.game.pin}/present`);
           }}
           onEdit={() => navigate(`/admin/games/${id}/edit`)}
+          onDelete={async () => {
+            await api.deleteGame(id);
+            navigate("/admin/games");
+          }}
           onBack={() => navigate("/admin/games")}
         />
       );
@@ -248,6 +252,11 @@ export default function App() {
           navigate("/admin/games/new");
         }}
         onOpen={(id) => navigate(`/admin/games/${id}`)}
+        onDelete={async (id) => {
+          await api.deleteGame(id);
+          setAdminView("list");
+          navigate("/admin/games");
+        }}
       />
     );
   }
@@ -361,7 +370,7 @@ function GamePlayerActive({
   const [displayName, setDisplayName] = useState("");
   const [joinError, setJoinError] = useState("");
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 250);
+    const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
   useEffect(() => {
@@ -371,7 +380,7 @@ function GamePlayerActive({
           .getGame(game.id)
           .then((r) => onUpdate(r.game))
           .catch(() => {}),
-      1500,
+      3000,
     );
     return () => clearInterval(t);
   }, [game.id, onUpdate]);
@@ -567,4 +576,3 @@ function FullScreenMessage({ text }: { text: string }) {
     </div>
   );
 }
-

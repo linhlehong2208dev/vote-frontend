@@ -46,11 +46,13 @@ export function GameManagementPage({
   gameId,
   onLobby,
   onEdit,
+  onDelete,
   onBack,
 }: {
   gameId: string;
   onLobby: () => void | Promise<void>;
   onEdit: () => void;
+  onDelete: () => void | Promise<void>;
   onBack: () => void;
 }) {
   const [game, setGame] = useState<GameInfo | null>(null);
@@ -123,6 +125,15 @@ export function GameManagementPage({
               className="rounded-xl bg-white/8 px-4 py-2.5 text-sm font-bold disabled:opacity-30"
             >
               Chỉnh sửa
+            </button>
+            <button
+              onClick={() => {
+                if (!window.confirm("Xóa Game này?")) return;
+                void onDelete();
+              }}
+              className="rounded-xl border border-coral/40 bg-coral/10 px-4 py-2.5 text-sm font-black text-coral"
+            >
+              Xóa
             </button>
             <button
               onClick={() => void action()}

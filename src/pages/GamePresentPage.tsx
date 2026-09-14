@@ -77,12 +77,12 @@ export function GamePresentPage({
   };
 
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 250);
+    const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
   useEffect(() => {
     void loadParticipants();
-    const t = setInterval(() => void loadParticipants(), 1500);
+    const t = setInterval(() => void loadParticipants(), 4000);
     return () => clearInterval(t);
   }, [game.id]);
   useEffect(() => {
@@ -92,7 +92,7 @@ export function GamePresentPage({
           .getGame(game.id)
           .then((r) => onGameUpdate(r.game))
           .catch(() => {}),
-      1500,
+      3000,
     );
     return () => clearInterval(t);
   }, [game.id, onGameUpdate]);
