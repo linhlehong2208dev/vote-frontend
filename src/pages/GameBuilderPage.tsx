@@ -38,7 +38,7 @@ export function GameBuilderPage({
   const [title, setTitle] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
   const [backgroundType, setBackgroundType] =
-    useState<GameBackgroundType>("gradient");
+    useState<GameBackgroundType>("color");
   const [backgroundValue, setBackgroundValue] = useState("#E4002B");
   const [questions, setQuestions] = useState<DraftQuestion[]>([
     defaultQuestion(1),

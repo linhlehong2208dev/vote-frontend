@@ -119,11 +119,9 @@ export function GamePresentPage({
             backgroundPosition: "center",
           }
         : game.background_type === "color"
-          ? { background: game.background_value || "#8B0017" }
+          ? { background: game.background_value || "#E4002B" }
           : {
-              background:
-                game.background_value ||
-                "linear-gradient(135deg,#8B0017,#C80D2C)",
+              background: game.background_value || "#E4002B",
             },
     [game],
   );
@@ -371,9 +369,8 @@ export function GamePresentPage({
           current.background_type === "image" && current.background_value
             ? `url(${current.background_value}) center/cover`
             : current.background_type === "color"
-              ? current.background_value || "#17102b"
-              : current.background_value ||
-                "linear-gradient(135deg,#17102b,#3c2472)",
+              ? current.background_value || "#E4002B"
+              : current.background_value || "#E4002B",
       }}
     >
       <div className="min-h-screen bg-black/20 px-5 py-6 md:px-10 md:py-8">

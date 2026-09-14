@@ -278,8 +278,10 @@ export function GameManagementPage({
                       </span>
                     </div>
                     <p className="mt-1 text-xs text-ink-500">
-                      Câu {v.questionNumber} ·{" "}
-                      {v.label ?? (v.optionId ? "Đã trả lời" : "Không trả lời")}
+                      Câu {v.questionNumber} · {v.displayName}{" "}
+                      {v.optionId
+                        ? `vote ${v.label ?? "một đáp án"}`
+                        : "chưa trả lời"}
                     </p>
                   </div>
                 ))}
