@@ -28,7 +28,8 @@ export function LoginPage() {
           Bình chọn văn nghệ
         </h1>
         <p className="mt-2 text-sm text-ink-500">
-          Đăng nhập bằng tài khoản Google công ty để tham gia bình chọn.
+          Đăng nhập bằng tài khoản Google REVER.VN của công ty để tham gia bình
+          chọn.
         </p>
 
         <button

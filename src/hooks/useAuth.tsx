@@ -13,6 +13,12 @@ const ALLOWED_DOMAIN_HINT = import.meta.env.VITE_ALLOWED_EMAIL_DOMAIN as
   | string
   | undefined;
 
+const APP_REDIRECT_URL = (
+  (import.meta.env.VITE_APP_URL as string | undefined) ??
+  (import.meta.env.VITE_SITE_URL as string | undefined) ??
+  window.location.origin
+).replace(/\/+$/, "");
+
 export interface UserProfile {
   email: string;
   fullName: string;
@@ -85,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: window.location.origin,
+        redirectTo: APP_REDIRECT_URL,
         ...(ALLOWED_DOMAIN_HINT
           ? { queryParams: { hd: ALLOWED_DOMAIN_HINT } }
           : {}),
