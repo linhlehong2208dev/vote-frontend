@@ -19,7 +19,7 @@ function BarChart({
   const max = Math.max(1, ...ranking.map((x) => x.votes));
   return (
     <div className="mt-5 flex min-h-[240px] items-end gap-3 overflow-x-auto rounded-2xl bg-black/15 p-5">
-      {ranking.map((item, i) => (
+      {ranking.map((item) => (
         <div
           key={item.optionId}
           className="flex min-w-[70px] flex-1 flex-col items-center justify-end gap-2"
@@ -34,14 +34,13 @@ function BarChart({
             />
           </div>
           <span className="w-full truncate text-center text-xs font-bold text-ink-500">
-            {String.fromCharCode(65 + i)} · {item.label}
+            {String.fromCharCode(65 + item.optionIndex)} · {item.label}
           </span>
         </div>
       ))}
     </div>
   );
 }
-
 export function GameManagementPage({
   gameId,
   onLobby,
