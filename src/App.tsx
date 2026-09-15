@@ -35,7 +35,7 @@ export default function App() {
   const [manualGamePin, setManualGamePin] = useState<string | null>(null);
   const [resolvedJoinSessionId, setResolvedJoinSessionId] = useState<
     string | null
-  >(    null);
+  >(null);
   const [joinResolving, setJoinResolving] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
   const [adminView, setAdminView] = useState<AdminView>("list");
@@ -323,7 +323,7 @@ function PublicRanking({ result }: { result: GamePublicResults }) {
                 </div>
               </div>
               <div className="mt-7 flex min-h-[260px] items-end gap-3 overflow-x-auto border-t border-stage-700 pt-5">
-                {q.ranking.map((item, i) => (
+                {q.ranking.map((item) => (
                   <div
                     key={item.optionId}
                     className="flex min-w-[72px] flex-1 flex-col items-center justify-end gap-2"
@@ -340,7 +340,8 @@ function PublicRanking({ result }: { result: GamePublicResults }) {
                       />
                     </div>
                     <span className="w-full truncate text-center text-xs font-bold text-ink-500">
-                      {String.fromCharCode(65 + i)} · {item.label}
+                      {String.fromCharCode(65 + item.optionIndex)} ·{" "}
+                      {item.label}
                     </span>
                   </div>
                 ))}
