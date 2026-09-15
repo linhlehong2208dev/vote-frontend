@@ -116,7 +116,12 @@ export interface GameQuestionDashboard {
   endedAt: string | null;
   totalVotes: number;
   noAnswerCount: number;
-  ranking: { optionId: string; label: string; votes: number }[];
+  ranking: {
+    optionId: string;
+    label: string;
+    votes: number;
+    optionIndex: number;
+  }[];
   history: {
     userId: string;
     displayName: string;
@@ -139,7 +144,12 @@ export interface GamePublicResults {
     endedAt: string | null;
     totalVotes: number;
     noAnswerCount: number;
-    ranking: { optionId: string; label: string; votes: number }[];
+    ranking: {
+      optionId: string;
+      label: string;
+      votes: number;
+      optionIndex: number;
+    }[];
   }>;
 }
 

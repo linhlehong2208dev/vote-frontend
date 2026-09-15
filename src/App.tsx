@@ -35,7 +35,7 @@ export default function App() {
   const [manualGamePin, setManualGamePin] = useState<string | null>(null);
   const [resolvedJoinSessionId, setResolvedJoinSessionId] = useState<
     string | null
-  >(null);
+  >(    null);
   const [joinResolving, setJoinResolving] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
   const [adminView, setAdminView] = useState<AdminView>("list");

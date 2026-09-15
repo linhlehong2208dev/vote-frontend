@@ -318,7 +318,7 @@ export function GamePresentPage({
                     </div>
                   </div>
                   <div className="mt-7 flex min-h-[260px] items-end gap-3 border-t border-stage-700 pt-5">
-                    {q.ranking.map((item, i) => (
+                    {q.ranking.map((item) => (
                       <div
                         key={item.optionId}
                         className="flex min-w-[70px] flex-1 flex-col items-center justify-end gap-2"
@@ -335,7 +335,8 @@ export function GamePresentPage({
                           />
                         </div>
                         <span className="w-full truncate text-center text-xs font-bold text-ink-500">
-                          {String.fromCharCode(65 + i)} · {item.label}
+                          {String.fromCharCode(65 + item.optionIndex)} ·{" "}
+                          {item.label}
                         </span>
                       </div>
                     ))}
